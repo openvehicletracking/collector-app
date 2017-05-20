@@ -1,9 +1,27 @@
 group 'net.motodev'
 version '1.0.0'
 
+def mainClassName = 'net.motodev.collector.AppMain'
+
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -15,3 +33,12 @@ dependencies {
     compile 'net.motodev:motodev-core:1.0.0'
     compile 'net.motodev.device:xtakip:1.0.0'
 }
+
+
+shadowJar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+build.finalizedBy shadowJar
