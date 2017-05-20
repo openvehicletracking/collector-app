@@ -3,6 +3,7 @@ package net.motodev.collector;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import net.motodev.collector.verticle.DeviceCommandVerticle;
+import net.motodev.collector.verticle.HttpVerticle;
 import net.motodev.collector.verticle.NewMessageVerticle;
 import net.motodev.collector.verticle.TcpVerticle;
 import net.motodev.core.MotodevCollector;
@@ -49,8 +50,10 @@ public class AppMain {
         tcpDeployOpts.setInstances(10).setHa(true).setConfig(jsonConf);
 
         VerticleRunner.run(TcpVerticle.class, null, tcpDeployOpts);
+        VerticleRunner.run(HttpVerticle.class, null, tcpDeployOpts);
         VerticleRunner.run(NewMessageVerticle.class, null, commonWorkerDeplOpts);
         VerticleRunner.run(DeviceCommandVerticle.class, null, commonWorkerDeplOpts);
+
     }
 
 }
