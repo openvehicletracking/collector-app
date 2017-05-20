@@ -1,0 +1,12 @@
+{
+  "collectorPort": 44772,
+  "httpPort": 44773,
+  "collectorHost": "0.0.0.0",
+  "database": {
+    "mongodb": {
+      "host": "localhost",
+      "port": 27017,
+      "db_name": "motodevcollector"
+    }
+  }
+}
