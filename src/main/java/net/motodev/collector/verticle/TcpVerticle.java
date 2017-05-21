@@ -1,6 +1,5 @@
 package net.motodev.collector.verticle;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by oksuz on 28/01/2017.
  */
-public class TcpVerticle extends AbstractVerticle {
+public class TcpVerticle extends MotodevAbstractVerticle {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TcpVerticle.class);
 

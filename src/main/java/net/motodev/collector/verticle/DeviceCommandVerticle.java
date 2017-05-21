@@ -1,6 +1,5 @@
 package net.motodev.collector.verticle;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by oksuz on 07/03/2017.
  */
-public class DeviceCommandVerticle extends AbstractVerticle {
+public class DeviceCommandVerticle extends MotodevAbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceCommandVerticle.class);
 
@@ -26,14 +25,11 @@ public class DeviceCommandVerticle extends AbstractVerticle {
         LOGGER.info("Starting verticle " + DeviceCommandVerticle.class.getName() );
         EventBus eventBus = vertx.eventBus();
 
-        MotodevCollector.getInstance().deviceRegistry().getDevices().forEach(d -> {
-            MessageConsumer<JsonObject> handler = eventBus.consumer(d.periodicMessageSubject());
-            handler.handler(periodicMessageHandler());
-        });
-
+        MessageConsumer<JsonObject> handler = eventBus.consumer(MotodevCollector.Constant.DEVICE_COMMAND);
+        handler.handler(messageHandler());
     }
 
-    private Handler<Message<JsonObject>> periodicMessageHandler() {
+    private Handler<Message<JsonObject>> messageHandler() {
         return message -> {
             JsonObject body = message.body();
 
