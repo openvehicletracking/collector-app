@@ -1,6 +1,5 @@
 package net.motodev.collector.verticle;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * Created by oksuz on 05/02/2017.
  */
-public class HttpVerticle extends AbstractVerticle {
+public class HttpVerticle extends MotodevAbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpVerticle.class);
 

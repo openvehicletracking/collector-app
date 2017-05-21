@@ -2,10 +2,7 @@ package net.motodev.collector;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
-import net.motodev.collector.verticle.DeviceCommandVerticle;
-import net.motodev.collector.verticle.HttpVerticle;
-import net.motodev.collector.verticle.NewMessageVerticle;
-import net.motodev.collector.verticle.TcpVerticle;
+import net.motodev.collector.verticle.*;
 import net.motodev.core.MotodevCollector;
 import net.motodev.device.XTakip;
 import org.slf4j.Logger;
@@ -41,7 +38,7 @@ public class AppMain {
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
 
 
-        MotodevCollector.getInstance().deviceRegistry().addDevice(new XTakip());
+        MotodevCollector.getInstance().addDevice(new XTakip());
 
         DeploymentOptions commonWorkerDeplOpts = new DeploymentOptions();
         commonWorkerDeplOpts.setWorker(true).setInstances(20).setConfig(jsonConf);
@@ -52,6 +49,7 @@ public class AppMain {
         VerticleRunner.run(TcpVerticle.class, null, tcpDeployOpts);
         VerticleRunner.run(HttpVerticle.class, null, tcpDeployOpts);
         VerticleRunner.run(NewMessageVerticle.class, null, commonWorkerDeplOpts);
+        VerticleRunner.run(PersistVerticle.class, null, commonWorkerDeplOpts);
         VerticleRunner.run(DeviceCommandVerticle.class, null, commonWorkerDeplOpts);
 
     }
