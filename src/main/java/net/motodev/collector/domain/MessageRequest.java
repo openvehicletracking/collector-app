@@ -38,14 +38,22 @@ public class MessageRequest {
     }
 
     public Date getFromDate() throws ParseException {
-        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : new Date();
-        return DateUtility.getBeginningOfDay(d);
+        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
+        if (d != null) {
+            return DateUtility.getBeginningOfDay(d);
+        }
+
+        return null;
     }
 
 
     public Date getToDate() throws ParseException {
-        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : new Date();
-        return DateUtility.getEndOfDay(d);
+        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
+        if (d != null) {
+            return DateUtility.getEndOfDay(d);
+        }
+
+        return null;
     }
 
 

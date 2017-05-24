@@ -22,17 +22,18 @@ public class MongoHelper {
         FindOptions findOptions = new FindOptions();
         findOptions.setLimit(size);
         findOptions.setSort(new JsonObject().put("datetime", -1));
-
-
-        JsonObject fromDate = new JsonObject().put("$date", DateUtility.toISODateFormat(from));
-        JsonObject toDate = new JsonObject().put("$date", DateUtility.toISODateFormat(to));
-        JsonObject datetimeCond = new JsonObject()
-                .put("$gte", fromDate)
-                .put("$lte", toDate);
-
         JsonObject query = new JsonObject();
+
+        if (null != from && null != to) {
+            JsonObject fromDate = new JsonObject().put("$date", DateUtility.toISODateFormat(from));
+            JsonObject toDate = new JsonObject().put("$date", DateUtility.toISODateFormat(to));
+            JsonObject datetimeCond = new JsonObject()
+                    .put("$gte", fromDate)
+                    .put("$lte", toDate);
+            query.put("datetime", datetimeCond);
+        }
+
         query.put("deviceId", deviceId);
-        query.put("datetime", datetimeCond);
         if (status != STATUS_ALL) {
             query.put("gpsStatus", status);
         }
