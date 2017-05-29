@@ -44,3 +44,12 @@ gelistirmeye hazirsiniz.
 `conf/config-dev.json` icindeki konfigurasyonu kendinize gore duzenleyiniz. `net.motodev.collector.AppMain.main` metodunu -Dconf=conf/config-dev.json paremetresi ile calistiriniz.
 
 ![figure1](https://i.hizliresim.com/r3q991.png "run1")
+
+
+## Yardimci Uygulamalar
+
+- [Packet Sender](https://packetsender.com/) tcp uzerinden paket gondermenize yardimci olur.
+- [Test Ortami](http://tracker-test.motodev.net:10001/api/messages/test-device-id)'ndan rawMessage field'indaki deger ile data mesaj olusturabilirsiniz.
+
+![figure2](https://i.hizliresim.com/O0WMy0.png "packetsender")
+
