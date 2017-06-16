@@ -13,7 +13,9 @@ import io.vertx.ext.web.handler.CorsHandler;
 import net.motodev.collector.domain.MessageRequest;
 import net.motodev.collector.helper.HttpHelper;
 import net.motodev.collector.helper.MongoHelper;
+import net.motodev.core.MotodevAbstractVerticle;
 import net.motodev.core.adapter.GeoJsonResponseAdapter;
+import net.motodev.core.db.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +88,7 @@ public class HttpVerticle extends MotodevAbstractVerticle {
         }
 
         MongoClient mongoClient = MongoClient.createNonShared(vertx, config().getJsonObject("database").getJsonObject("mongodb"));
-        mongoClient.findWithOptions(MongoHelper.MESSAGES, query.getQuery(), query.getFindOptions(), result -> {
+        mongoClient.findWithOptions(Collection.MESSAGES, query.getQuery(), query.getFindOptions(), result -> {
             handler.handle(result);
             mongoClient.close();
         });

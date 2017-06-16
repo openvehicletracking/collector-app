@@ -11,11 +11,7 @@ import java.util.Date;
  */
 public class MongoHelper {
 
-    public static final String MESSAGES = "messages";
-    public static final String USERS = "users";
-    public static final String COMMANDS = "commands";
     public static final int STATUS_ALL = -1;
-
 
     public static Query getLastMessagesQuery(int size, int status, String deviceId, Date from, Date to) {
 

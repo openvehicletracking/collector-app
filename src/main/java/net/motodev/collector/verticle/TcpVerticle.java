@@ -8,7 +8,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
-import net.motodev.core.MotodevCollector;
+import net.motodev.core.Motodev;
+import net.motodev.core.MotodevAbstractVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,6 @@ public class TcpVerticle extends MotodevAbstractVerticle {
     private static Logger LOGGER = LoggerFactory.getLogger(TcpVerticle.class);
 
     private NetServerOptions serverOptions = new NetServerOptions();
-
     @Override
     public void start() throws Exception {
         serverOptions.setPort(config().getInteger("collectorPort", 9998));
@@ -45,7 +45,7 @@ public class TcpVerticle extends MotodevAbstractVerticle {
     }
 
     private Handler<Buffer> messageHandler(NetSocket socket) {
-        return buffer -> vertx.eventBus().send(MotodevCollector.Constant.NEW_MESSAGE, buffer, replyHandler(socket));
+        return buffer -> vertx.eventBus().send(Motodev.Constant.NEW_MESSAGE, buffer, replyHandler(socket));
     }
 
     private Handler<AsyncResult<Message<JsonArray>>> replyHandler(NetSocket socket) {
@@ -60,5 +60,4 @@ public class TcpVerticle extends MotodevAbstractVerticle {
             }
         };
     }
-
 }

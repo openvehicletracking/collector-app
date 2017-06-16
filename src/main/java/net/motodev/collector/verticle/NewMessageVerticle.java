@@ -8,9 +8,10 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import net.motodev.core.Message;
-import net.motodev.core.MessageHandler;
-import net.motodev.core.MotodevCollector;
+import net.motodev.core.Motodev;
+import net.motodev.core.MotodevAbstractVerticle;
+import net.motodev.core.message.Message;
+import net.motodev.core.message.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public class NewMessageVerticle extends MotodevAbstractVerticle {
         LOGGER.info("Starting verticle " + NewMessageVerticle.class.getName() );
         EventBus eventBus = vertx.eventBus();
 
-        MessageConsumer<Buffer> consumer = eventBus.consumer(MotodevCollector.Constant.NEW_MESSAGE);
+        MessageConsumer<Buffer> consumer = eventBus.consumer(Motodev.Constant.NEW_MESSAGE);
         consumer.handler(messageHandler(new Gson()));
     }
 
@@ -51,8 +52,8 @@ public class NewMessageVerticle extends MotodevAbstractVerticle {
                 messageToSend.put("deviceId", m.deviceId());
             }
 
-            vertx.eventBus().send(MotodevCollector.Constant.DEVICE_COMMAND, messageToSend, replyHandler(bufferMessage));
-            vertx.eventBus().send(MotodevCollector.Constant.PERSIST, message, replyHandler(bufferMessage));
+            vertx.eventBus().send(Motodev.Constant.DEVICE_COMMAND, messageToSend, replyHandler(bufferMessage));
+            vertx.eventBus().send(Motodev.Constant.PERSIST, message, replyHandler(bufferMessage));
         };
     }
 

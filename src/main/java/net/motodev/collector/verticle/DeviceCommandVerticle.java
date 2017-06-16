@@ -7,8 +7,9 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import net.motodev.collector.helper.MongoHelper;
-import net.motodev.core.MotodevCollector;
+import net.motodev.core.Motodev;
+import net.motodev.core.MotodevAbstractVerticle;
+import net.motodev.core.db.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class DeviceCommandVerticle extends MotodevAbstractVerticle {
         LOGGER.info("Starting verticle " + DeviceCommandVerticle.class.getName() );
         EventBus eventBus = vertx.eventBus();
 
-        MessageConsumer<JsonObject> handler = eventBus.consumer(MotodevCollector.Constant.DEVICE_COMMAND);
+        MessageConsumer<JsonObject> handler = eventBus.consumer(Motodev.Constant.DEVICE_COMMAND);
         handler.handler(messageHandler());
     }
 
@@ -36,7 +37,7 @@ public class DeviceCommandVerticle extends MotodevAbstractVerticle {
             MongoClient mongoClient = MongoClient.createNonShared(vertx, config().getJsonObject("database").getJsonObject("mongodb"));
             JsonObject query = new JsonObject().put("deviceId", body.getString("deviceId")).put("read", false);
 
-            mongoClient.find(MongoHelper.COMMANDS, query, result -> {
+            mongoClient.find(Collection.COMMANDS, query, result -> {
                 if (result.succeeded()) {
                     JsonArray reply = new JsonArray();
                     result.result().forEach(record -> {
@@ -56,5 +57,4 @@ public class DeviceCommandVerticle extends MotodevAbstractVerticle {
             });
         };
     }
-
 }

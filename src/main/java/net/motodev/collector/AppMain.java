@@ -3,7 +3,7 @@ package net.motodev.collector;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import net.motodev.collector.verticle.*;
-import net.motodev.core.MotodevCollector;
+import net.motodev.core.Motodev;
 import net.motodev.device.XTakip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,21 +37,19 @@ public class AppMain {
         JsonObject jsonConf = new JsonObject(config);
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
 
+        DeploymentOptions workerDeploymentOptions = new DeploymentOptions().setWorker(true).setInstances(2);
+        DeploymentOptions tcpDeployOpts = new DeploymentOptions().setInstances(5);
 
-        MotodevCollector.getInstance().addDevice(new XTakip());
+        Motodev motodev = Motodev.create(jsonConf);
+        motodev.getDeviceRegistry().register(new XTakip());
 
-        DeploymentOptions commonWorkerDeplOpts = new DeploymentOptions();
-        commonWorkerDeplOpts.setWorker(true).setInstances(20).setConfig(jsonConf);
 
-        DeploymentOptions tcpDeployOpts = new DeploymentOptions();
-        tcpDeployOpts.setInstances(10).setHa(true).setConfig(jsonConf);
-
-        VerticleRunner.run(TcpVerticle.class, null, tcpDeployOpts);
-        VerticleRunner.run(HttpVerticle.class, null, tcpDeployOpts);
-        VerticleRunner.run(NewMessageVerticle.class, null, commonWorkerDeplOpts);
-        VerticleRunner.run(PersistVerticle.class, null, commonWorkerDeplOpts);
-        VerticleRunner.run(DeviceCommandVerticle.class, null, commonWorkerDeplOpts);
-
+        motodev.deployVerticle(TcpVerticle.class, tcpDeployOpts);
+        motodev.deployVerticle(HttpVerticle.class, tcpDeployOpts);
+        motodev.deployVerticle(NewMessageVerticle.class, workerDeploymentOptions);
+        motodev.deployVerticle(PersistVerticle.class, workerDeploymentOptions);
+        motodev.deployVerticle(DeviceCommandVerticle.class, workerDeploymentOptions);
+        motodev.deployVerticle(DeviceAlertVerticle.class, workerDeploymentOptions);
     }
 
 }
