@@ -2,6 +2,7 @@ package net.motodev.collector.helper;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
+import net.motodev.core.GpsStatus;
 import net.motodev.core.utility.DateUtility;
 
 import java.util.Date;
@@ -11,9 +12,7 @@ import java.util.Date;
  */
 public class MongoHelper {
 
-    public static final int STATUS_ALL = -1;
-
-    public static Query getLastMessagesQuery(int size, int status, String deviceId, Date from, Date to) {
+    public static Query getLastMessagesQuery(int size, GpsStatus status, String deviceId, Date from, Date to) {
 
         FindOptions findOptions = new FindOptions();
         findOptions.setLimit(size);
@@ -30,7 +29,7 @@ public class MongoHelper {
         }
 
         query.put("deviceId", deviceId);
-        if (status != STATUS_ALL) {
+        if (status != null) {
             query.put("gpsStatus", status);
         }
 

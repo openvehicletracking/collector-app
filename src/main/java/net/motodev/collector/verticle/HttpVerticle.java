@@ -77,11 +77,17 @@ public class HttpVerticle extends MotodevAbstractVerticle {
     }
 
     private void lastMessages(RoutingContext ctx, Handler<AsyncResult<List<JsonObject>>> handler) {
-        MessageRequest request = new MessageRequest(ctx.request());
+        MessageRequest request;
+        try {
+            request = new MessageRequest(ctx.request());
+        } catch (Exception e) {
+            HttpHelper.getBadRequest(ctx.response(), e.getMessage());
+            return;
+        }
 
         MongoHelper.Query query;
         try {
-            query = MongoHelper.getLastMessagesQuery(request.getSize(), request.getStatus(), request.getDeviceId(), request.getFromDate(), request.getToDate());
+            query = MongoHelper.getLastMessagesQuery(request.getSize(), request.getGpsStatus(), request.getDeviceId(), request.getFromDate(), request.getToDate());
         } catch (ParseException e) {
             HttpHelper.getBadRequest(ctx.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT);
             return;

@@ -1,7 +1,10 @@
 package net.motodev.collector.domain;
 
 import io.vertx.core.http.HttpServerRequest;
+import net.motodev.core.GpsStatus;
 import net.motodev.core.utility.DateUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,8 +19,9 @@ public class MessageRequest {
     private HttpServerRequest request;
 
     public static final int DEFAULT_LIMIT = 100;
-    public static final int DEFAULT_STATUS = -1;
-    public static final String DATE_FORMAT = "yyyyMMdd";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageRequest.class);
+
     public static ThreadLocal<SimpleDateFormat> requestDateFormat = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -25,8 +29,15 @@ public class MessageRequest {
         }
     };
 
-    public MessageRequest(HttpServerRequest request) {
+    public MessageRequest(HttpServerRequest request) throws Exception {
         this.request = request;
+        validateRequest();
+    }
+
+    private void validateRequest() throws Exception {
+        if (getSize() == 0 && getFromDate() == null) {
+            throw new Exception("date field is mandatory");
+        }
     }
 
     public int getSize() {
@@ -57,12 +68,14 @@ public class MessageRequest {
     }
 
 
-    public int getStatus() {
+    public GpsStatus getGpsStatus() {
         try {
-            return (request.getParam("messageStatus") != null) ? Integer.parseInt(request.getParam("messageStatus")) : DEFAULT_STATUS;
-        } catch (NumberFormatException ignored) {}
+            return GpsStatus.valueOf(request.getParam("gps"));
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Invalid status: " + request.getParam("gps"), e);
+        }
 
-        return  DEFAULT_STATUS;
+        return null;
     }
 
     public String getDeviceId() {
