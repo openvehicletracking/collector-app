@@ -8,7 +8,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import net.motodev.core.Device;
 import net.motodev.core.Motodev;
 import net.motodev.core.MotodevAbstractVerticle;
-import net.motodev.core.db.DeviceQueryExecutor;
+import net.motodev.core.db.DeviceQueryHelper;
 import net.motodev.core.message.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,20 +42,24 @@ public class PersistVerticle extends MotodevAbstractVerticle {
             net.motodev.core.message.Message m = handler.handle(message.body());
 
             if (m.isCommand()) {
+                LOGGER.info("Message is command, updating command: {}", m);
                 motodev.getPersistor().updateCommand(m);
                 return;
             }
 
             Device device = motodev.getDeviceRegistry().findDevice(m.device());
-            DeviceQueryExecutor deviceQueryExecutor = new DeviceQueryExecutor(m.deviceId(), motodev.getPersistor());
+            LOGGER.info("found device [{}] for message {}", device.name(), message.body());
+
+            DeviceQueryHelper deviceQueryExecutor = new DeviceQueryHelper(m.deviceId(), motodev.getPersistor());
 
             device.createAlarmIfRequired(m, deviceQueryExecutor, alarm -> {
                 if (null != alarm) {
+                    motodev.getPersistor().createAlarm(alarm);
                     motodev.getVertx().eventBus().send(Motodev.Constant.ALARM, gson.toJson(alarm));
                 }
             });
-            device.updateMeta(m, deviceQueryExecutor);
 
+            device.updateMeta(m, deviceQueryExecutor);
             motodev.getPersistor().saveMessage(m);
         };
     }

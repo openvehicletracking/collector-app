@@ -31,7 +31,7 @@ public class DeviceAlertVerticle extends MotodevAbstractVerticle {
     private Handler<Message<String>> messageHandler(Gson gson) {
         return message -> {
             Alarm alarm = gson.fromJson(message.body(), Alarm.class);
-            motodev.getPersistor().createAlarm(alarm);
+            LOGGER.info("alarm fired {}", alarm);
         };
     }
 }

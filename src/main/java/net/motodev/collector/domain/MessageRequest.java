@@ -69,10 +69,12 @@ public class MessageRequest {
 
 
     public GpsStatus getGpsStatus() {
-        try {
-            return GpsStatus.valueOf(request.getParam("gps"));
-        } catch (IllegalArgumentException e) {
-            LOGGER.info("Invalid status: " + request.getParam("gps"), e);
+        if (request.getParam("gps") != null) {
+            try {
+                return GpsStatus.valueOf(request.getParam("gps"));
+            } catch (IllegalArgumentException e) {
+                LOGGER.info("Invalid status: " + request.getParam("gps"), e);
+            }
         }
 
         return null;
