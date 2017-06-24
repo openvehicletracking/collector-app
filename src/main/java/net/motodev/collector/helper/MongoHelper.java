@@ -3,7 +3,6 @@ package net.motodev.collector.helper;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import net.motodev.core.GpsStatus;
-import net.motodev.core.utility.DateUtility;
 
 import java.util.Date;
 
@@ -20,11 +19,9 @@ public class MongoHelper {
         JsonObject query = new JsonObject();
 
         if (null != from && null != to) {
-            JsonObject fromDate = new JsonObject().put("$date", DateUtility.toISODateFormat(from));
-            JsonObject toDate = new JsonObject().put("$date", DateUtility.toISODateFormat(to));
             JsonObject datetimeCond = new JsonObject()
-                    .put("$gte", fromDate)
-                    .put("$lte", toDate);
+                    .put("$gte", from.getTime())
+                    .put("$lte", to.getTime());
             query.put("datetime", datetimeCond);
         }
 
