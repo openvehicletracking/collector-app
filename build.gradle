@@ -2,7 +2,7 @@ group 'net.motodev'
 version '1.0.1'
 
 def mainClassName = 'net.motodev.collector.AppMain'
-
+def environment = project.hasProperty("env") ? project.property("env") : "dev";
 
 buildscript {
     repositories {
@@ -36,6 +36,9 @@ dependencies {
 
 
 shadowJar {
+    baseName = 'motodev-collector'
+    classifier = null
+    version = null
     manifest {
         attributes 'Main-Class': mainClassName
     }

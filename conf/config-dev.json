@@ -4,7 +4,7 @@
   "collectorHost": "0.0.0.0",
   "database": {
     "mongodb": {
-      "host": "localhost",
+      "host": "dockermongohost",
       "port": 27017,
       "db_name": "motodevcollector"
     }
