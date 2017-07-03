@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-MAINTAINER Yunus Oksuz <yunusoksuz@gmail.com>
+MAINTAINER MotoDev OpenMTS <motodevnet@gmail.com>
 
 # install required packages
 RUN apt-get update -y
@@ -8,18 +8,19 @@ RUN apt-get install -y default-jre nginx tzdata locales
 
 # configure timezone
 RUN echo "Europe/Istanbul" > /etc/timezone
+RUN rm -f /etc/localtime
 RUN dpkg-reconfigure -f noninteractive tzdata
 
-# copy app files
-RUN mkdir -p /opt/app
-COPY conf/* /opt/app/
+# copy app config
+RUN mkdir -p /opt/app/config
+COPY config/* /opt/app/config/
+
+# copy app
 COPY build/libs/motodev-collector.jar /opt/app/motodev-collector.jar
+
+# init script
 COPY run.sh /opt/app/run.sh
 RUN chmod +x /opt/app/run.sh
-
-# copy nginx config and restart
-RUN ln -s /opt/app/nginx.conf /etc/nginx/sites-enabled/collector-http.conf
-RUN update-rc.d nginx enable
 
 EXPOSE 80 44772
 WORKDIR /opt/app

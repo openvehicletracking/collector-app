@@ -1,0 +1,12 @@
+{
+  "collectorPort": 10001,
+  "httpPort": 10002,
+  "collectorHost": "0.0.0.0",
+  "database": {
+    "mongodb": {
+      "host": "dockermongohost",
+      "port": 27017,
+      "db_name": "motodevcollector_test"
+    }
+  }
+}

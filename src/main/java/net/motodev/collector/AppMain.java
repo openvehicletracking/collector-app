@@ -26,6 +26,8 @@ public class AppMain {
             throw new RuntimeException("please specify your config file like -Dconf=/path/to/config.json");
         }
 
+        LOGGER.info("Starting app with config file: {}", configFile);
+
         String config;
         try {
             config = new Scanner(new File(configFile), "UTF-8").useDelimiter("\\A").next();
