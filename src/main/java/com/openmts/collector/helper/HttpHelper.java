@@ -48,5 +48,12 @@ public class HttpHelper {
     }
 
 
+    public static HttpServerResponse getNotFound(HttpServerResponse response, String error) {
+        String out = new JsonObject().put("error", error).toString();
 
+        return response.setStatusCode(HttpResponseStatus.NOT_FOUND.code())
+                .setStatusMessage(HttpResponseStatus.NOT_FOUND.reasonPhrase())
+                .putHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(out.length()))
+                .write(out);
+    }
 }

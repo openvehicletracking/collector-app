@@ -33,6 +33,14 @@ public class MongoHelper {
         return new Query(findOptions, query);
     }
 
+    public static Query getUserQuery(String username, String encodedPassword) {
+        JsonObject query = new JsonObject();
+        query.put("username", username);
+        query.put("password", encodedPassword);
+        query.put("isActive", true);
+        return new Query(null, query);
+    }
+
 
     public static class Query {
 

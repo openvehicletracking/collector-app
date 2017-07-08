@@ -1,7 +1,13 @@
 package com.openmts.collector.verticle;
 
+import com.openmts.collector.controller.CreateAccessTokenController;
 import com.openmts.collector.domain.MessageRequest;
+import com.openmts.collector.helper.HttpHelper;
 import com.openmts.collector.helper.MongoHelper;
+import com.openmts.core.Motodev;
+import com.openmts.core.MotodevAbstractVerticle;
+import com.openmts.core.adapter.GeoJsonResponseAdapter;
+import com.openmts.core.db.Collection;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -12,10 +18,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.core.MotodevAbstractVerticle;
-import com.openmts.core.adapter.GeoJsonResponseAdapter;
-import com.openmts.core.db.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,8 @@ import java.util.List;
  * Created by oksuz on 05/02/2017.
  */
 public class HttpVerticle extends MotodevAbstractVerticle {
+
+    private static final String VIRTUAL_PATH = "/api";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpVerticle.class);
 
@@ -47,11 +51,14 @@ public class HttpVerticle extends MotodevAbstractVerticle {
                 .allowedHeader("Authorization")
                 .allowedHeader("X-Requested-With"));
 
-        router.route(HttpMethod.GET, "/api/messages/:deviceId").handler(this::getLastMessages);
-        router.route(HttpMethod.GET, "/api/messages/:deviceId/geojson").handler(this::getLastMessagesAsGeoJson);
+
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/messages/:deviceId").handler(this::getLastMessages);
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/api/messages/:deviceId/geojson").handler(this::getLastMessagesAsGeoJson);
+        router.route(HttpMethod.POST, VIRTUAL_PATH + "/access-token").handler(CreateAccessTokenController::new);
 
         httpServer.requestHandler(router::accept).listen(config().getInteger("httpPort"));
     }
+
 
     private void getLastMessagesAsGeoJson(RoutingContext context) {
         lastMessages(context, result -> {
@@ -72,7 +79,7 @@ public class HttpVerticle extends MotodevAbstractVerticle {
                 HttpHelper.getInternalServerError(ctx.response(), "internal server error").end();
             }
 
-            HttpHelper.getOK(ctx.response(), result.result().toString());
+            HttpHelper.getOK(ctx.response(), result.result().toString()).end();
         });
     }
 
@@ -81,7 +88,7 @@ public class HttpVerticle extends MotodevAbstractVerticle {
         try {
             request = new MessageRequest(ctx.request());
         } catch (Exception e) {
-            HttpHelper.getBadRequest(ctx.response(), e.getMessage());
+            HttpHelper.getBadRequest(ctx.response(), e.getMessage()).end();
             return;
         }
 
@@ -89,11 +96,11 @@ public class HttpVerticle extends MotodevAbstractVerticle {
         try {
             query = MongoHelper.getLastMessagesQuery(request.getSize(), request.getGpsStatus(), request.getDeviceId(), request.getFromDate(), request.getToDate());
         } catch (ParseException e) {
-            HttpHelper.getBadRequest(ctx.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT);
+            HttpHelper.getBadRequest(ctx.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT).end();
             return;
         }
 
-        MongoClient mongoClient = MongoClient.createNonShared(vertx, config().getJsonObject("database").getJsonObject("mongodb"));
+        MongoClient mongoClient = Motodev.getInstance().newDbClient();
         mongoClient.findWithOptions(Collection.MESSAGES, query.getQuery(), query.getFindOptions(), result -> {
             handler.handle(result);
             mongoClient.close();
