@@ -1,4 +1,4 @@
-package net.motodev.collector.verticle;
+package com.openmts.collector.verticle;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -8,8 +8,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
-import net.motodev.core.Motodev;
-import net.motodev.core.MotodevAbstractVerticle;
+import com.openmts.core.Motodev;
+import com.openmts.core.MotodevAbstractVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

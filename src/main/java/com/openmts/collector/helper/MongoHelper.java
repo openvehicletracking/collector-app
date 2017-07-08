@@ -1,8 +1,8 @@
-package net.motodev.collector.helper;
+package com.openmts.collector.helper;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
-import net.motodev.core.GpsStatus;
+import com.openmts.core.GpsStatus;
 
 import java.util.Date;
 

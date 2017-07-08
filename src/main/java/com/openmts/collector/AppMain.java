@@ -1,10 +1,10 @@
-package net.motodev.collector;
+package com.openmts.collector;
 
+import com.openmts.collector.verticle.*;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
-import net.motodev.collector.verticle.*;
-import net.motodev.core.Motodev;
-import net.motodev.device.XTakip;
+import com.openmts.core.Motodev;
+import com.openmts.device.xtakip.XTakip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

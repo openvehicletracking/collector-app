@@ -1,5 +1,7 @@
-package net.motodev.collector.verticle;
+package com.openmts.collector.verticle;
 
+import com.openmts.collector.domain.MessageRequest;
+import com.openmts.collector.helper.MongoHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -10,12 +12,10 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
-import net.motodev.collector.domain.MessageRequest;
-import net.motodev.collector.helper.HttpHelper;
-import net.motodev.collector.helper.MongoHelper;
-import net.motodev.core.MotodevAbstractVerticle;
-import net.motodev.core.adapter.GeoJsonResponseAdapter;
-import net.motodev.core.db.Collection;
+import com.openmts.collector.helper.HttpHelper;
+import com.openmts.core.MotodevAbstractVerticle;
+import com.openmts.core.adapter.GeoJsonResponseAdapter;
+import com.openmts.core.db.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

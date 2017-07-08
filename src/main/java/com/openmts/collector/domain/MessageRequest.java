@@ -1,8 +1,8 @@
-package net.motodev.collector.domain;
+package com.openmts.collector.domain;
 
 import io.vertx.core.http.HttpServerRequest;
-import net.motodev.core.GpsStatus;
-import net.motodev.core.utility.DateUtility;
+import com.openmts.core.GpsStatus;
+import com.openmts.core.utility.DateUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,13 +1,13 @@
-package net.motodev.collector.verticle;
+package com.openmts.collector.verticle;
 
 import com.google.gson.Gson;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
-import net.motodev.core.Motodev;
-import net.motodev.core.MotodevAbstractVerticle;
-import net.motodev.core.alarm.Alarm;
+import com.openmts.core.Motodev;
+import com.openmts.core.MotodevAbstractVerticle;
+import com.openmts.core.alarm.Alarm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

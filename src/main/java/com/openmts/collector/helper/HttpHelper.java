@@ -1,4 +1,4 @@
-package net.motodev.collector.helper;
+package com.openmts.collector.helper;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpHeaders;

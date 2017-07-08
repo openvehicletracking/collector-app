@@ -1,4 +1,4 @@
-package net.motodev.collector.verticle;
+package com.openmts.collector.verticle;
 
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
@@ -7,9 +7,9 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import net.motodev.core.Motodev;
-import net.motodev.core.MotodevAbstractVerticle;
-import net.motodev.core.db.Collection;
+import com.openmts.core.Motodev;
+import com.openmts.core.MotodevAbstractVerticle;
+import com.openmts.core.db.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

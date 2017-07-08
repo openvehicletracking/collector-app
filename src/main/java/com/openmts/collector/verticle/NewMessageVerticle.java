@@ -1,4 +1,4 @@
-package net.motodev.collector.verticle;
+package com.openmts.collector.verticle;
 
 import com.google.gson.Gson;
 import io.vertx.core.AsyncResult;
@@ -8,10 +8,10 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import net.motodev.core.Motodev;
-import net.motodev.core.MotodevAbstractVerticle;
-import net.motodev.core.message.Message;
-import net.motodev.core.message.MessageHandler;
+import com.openmts.core.Motodev;
+import com.openmts.core.MotodevAbstractVerticle;
+import com.openmts.core.message.Message;
+import com.openmts.core.message.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
