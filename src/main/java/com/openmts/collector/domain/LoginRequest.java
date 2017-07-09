@@ -1,6 +1,6 @@
 package com.openmts.collector.domain;
 
-import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,20 +14,20 @@ import java.util.Objects;
  */
 public class LoginRequest {
 
-    private HttpServerRequest request;
+    private RoutingContext context;
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginRequest.class);
 
-    public LoginRequest(HttpServerRequest request) {
-        this.request = request;
+    public LoginRequest(RoutingContext context) {
+        this.context = context;
     }
 
     public String getUsername() {
-        return request.getParam("username");
+        return context.getBodyAsJson().getString("username");
     }
 
     public String getEncodedPassword() {
         try {
-            return sha1(request.getParam("password"));
+            return sha1(context.getBodyAsJson().getString("password"));
         } catch (Exception e) {
             LOGGER.error("sha1 exception", e);
         }
@@ -36,7 +36,7 @@ public class LoginRequest {
     }
 
     public String getPassword() {
-        return request.getParam("password");
+        return context.getBodyAsJson().getString("password");
     }
 
     private String sha1(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {

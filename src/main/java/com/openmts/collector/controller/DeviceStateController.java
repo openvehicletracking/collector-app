@@ -24,8 +24,15 @@ public class DeviceStateController extends AbstractController {
 
     @Override
     public void response() {
+        String deviceId = routingContext.request().getParam("deviceId");
+        JsonObject user = routingContext.get("user");
+        if (!user.getJsonArray("devices").contains(deviceId)) {
+            HttpHelper.getUnauthorized(routingContext.response());
+            return;
+        }
+
         client = Motodev.getInstance().newDbClient();
-        JsonObject query = new JsonObject().put("deviceId", routingContext.request().getParam("deviceId"));
+        JsonObject query = new JsonObject().put("deviceId", deviceId);
         client.find(Collection.DEVICE_META, query, getDeviceMetaHandler());
     }
 

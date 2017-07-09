@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by oksuz on 09/07/2017.
  */
-public class LastMessagesGeoJsonController extends AbstractLastMessages {
+public class LastMessagesGeoJsonController extends AbstractLastMessagesController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LastMessagesGeoJsonController.class);
 

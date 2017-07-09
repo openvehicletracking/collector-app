@@ -30,7 +30,7 @@ public class CreateAccessTokenController extends AbstractController {
     @Override
     public void response() {
         client = Motodev.getInstance().newDbClient();
-        LoginRequest loginRequest = new LoginRequest(routingContext.request());
+        LoginRequest loginRequest = new LoginRequest(routingContext);
         MongoHelper.Query query = MongoHelper.getUserQuery(loginRequest.getUsername(), loginRequest.getEncodedPassword());
         client.find(Collection.USERS, query.getQuery(), getFindUserHandler(query));
     }

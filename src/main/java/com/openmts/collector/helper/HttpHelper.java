@@ -47,6 +47,11 @@ public class HttpHelper {
                 .write(out);
     }
 
+    public static HttpServerResponse getOKNoContent(HttpServerResponse response) {
+        return response.setStatusCode(HttpResponseStatus.NO_CONTENT.code())
+                .setStatusMessage(HttpResponseStatus.NO_CONTENT.reasonPhrase());
+    }
+
 
     public static HttpServerResponse getNotFound(HttpServerResponse response, String error) {
         String out = new JsonObject().put("error", error).toString();

@@ -1,9 +1,6 @@
 package com.openmts.collector.verticle;
 
-import com.openmts.collector.controller.CreateAccessTokenController;
-import com.openmts.collector.controller.DeviceStateController;
-import com.openmts.collector.controller.LastMessagesController;
-import com.openmts.collector.controller.LastMessagesGeoJsonController;
+import com.openmts.collector.controller.*;
 import com.openmts.collector.filter.AuthorizationFilter;
 import com.openmts.core.MotodevAbstractVerticle;
 import io.vertx.core.http.HttpMethod;
@@ -45,7 +42,8 @@ public class HttpVerticle extends MotodevAbstractVerticle {
                 .allowedMethod(HttpMethod.DELETE)
                 .allowedHeader("Content-Type")
                 .allowedHeader("Authorization")
-                .allowedHeader("X-Requested-With"));
+                .allowedHeader("X-Requested-With")
+                .allowedHeader("X-Access-Token"));
 
         router.route().handler(AuthorizationFilter.create(allowedPaths));
 
@@ -55,6 +53,8 @@ public class HttpVerticle extends MotodevAbstractVerticle {
         router.route(HttpMethod.GET, VIRTUAL_PATH + "/messages/:deviceId/geojson").handler(LastMessagesGeoJsonController::new);
 
         router.route(HttpMethod.GET, VIRTUAL_PATH + "/device/meta/:deviceId").handler(DeviceStateController::new);
+
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/user/checkpoint").handler(UserCheckPointController::new);
 
         router.route(HttpMethod.POST, VIRTUAL_PATH + "/access-token").handler(CreateAccessTokenController::new);
 

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by oksuz on 09/07/2017.
  */
-public class LastMessagesController extends AbstractLastMessages {
+public class LastMessagesController extends AbstractLastMessagesController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LastMessagesController.class);
 

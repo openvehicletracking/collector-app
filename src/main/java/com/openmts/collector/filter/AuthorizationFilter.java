@@ -49,6 +49,7 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
 
         client.find(Collection.USERS, query, result -> {
            if (result.succeeded() && result.result() != null && result.result().size() > 0) {
+               context.put("user", result.result().get(0));
                context.next();
            } else {
                HttpHelper.getUnauthorized(response).end();

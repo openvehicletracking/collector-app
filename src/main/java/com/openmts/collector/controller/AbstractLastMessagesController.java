@@ -17,9 +17,9 @@ import java.util.List;
 /**
  * Created by oksuz on 09/07/2017.
  */
-abstract public class AbstractLastMessages extends AbstractController {
+abstract public class AbstractLastMessagesController extends AbstractController {
 
-    public AbstractLastMessages(RoutingContext context) {
+    public AbstractLastMessagesController(RoutingContext context) {
         super(context);
     }
 
@@ -29,6 +29,12 @@ abstract public class AbstractLastMessages extends AbstractController {
             request = new MessageRequest(ctx.request());
         } catch (Exception e) {
             HttpHelper.getBadRequest(ctx.response(), e.getMessage()).end();
+            return;
+        }
+
+        JsonObject user = routingContext.get("user");
+        if (!user.getJsonArray("devices").contains(request.getDeviceId())) {
+            HttpHelper.getUnauthorized(routingContext.response());
             return;
         }
 
