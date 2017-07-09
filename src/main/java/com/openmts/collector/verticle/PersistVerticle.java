@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by yo on 21/05/2017.
+ * Created by oksuz on 21/05/2017.
+ *
  */
 public class PersistVerticle extends MotodevAbstractVerticle {
 

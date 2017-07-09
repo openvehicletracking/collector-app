@@ -1,31 +1,25 @@
 package com.openmts.collector.verticle;
 
 import com.openmts.collector.controller.CreateAccessTokenController;
-import com.openmts.collector.domain.MessageRequest;
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.collector.helper.MongoHelper;
-import com.openmts.core.Motodev;
+import com.openmts.collector.controller.DeviceStateController;
+import com.openmts.collector.controller.LastMessagesController;
+import com.openmts.collector.controller.LastMessagesGeoJsonController;
+import com.openmts.collector.filter.AuthorizationFilter;
 import com.openmts.core.MotodevAbstractVerticle;
-import com.openmts.core.adapter.GeoJsonResponseAdapter;
-import com.openmts.core.db.Collection;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by oksuz on 05/02/2017.
+ *
  */
 public class HttpVerticle extends MotodevAbstractVerticle {
 
@@ -38,8 +32,10 @@ public class HttpVerticle extends MotodevAbstractVerticle {
         LOGGER.info("Starting verticle {} on port {}", HttpVerticle.class.getSimpleName(), config().getInteger("httpPort"));
         HttpServer httpServer = vertx.createHttpServer();
 
-        Router router = Router.router(vertx);
+        List<String> allowedPaths = new CopyOnWriteArrayList<>();
+        allowedPaths.add(VIRTUAL_PATH + "/access-token");
 
+        Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
         router.route().handler(CorsHandler.create("*")
                 .allowedMethod(HttpMethod.GET)
@@ -51,60 +47,19 @@ public class HttpVerticle extends MotodevAbstractVerticle {
                 .allowedHeader("Authorization")
                 .allowedHeader("X-Requested-With"));
 
+        router.route().handler(AuthorizationFilter.create(allowedPaths));
 
-        router.route(HttpMethod.GET, VIRTUAL_PATH + "/messages/:deviceId").handler(this::getLastMessages);
-        router.route(HttpMethod.GET, VIRTUAL_PATH + "/api/messages/:deviceId/geojson").handler(this::getLastMessagesAsGeoJson);
+
+
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/messages/:deviceId").handler(LastMessagesController::new);
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/messages/:deviceId/geojson").handler(LastMessagesGeoJsonController::new);
+
+        router.route(HttpMethod.GET, VIRTUAL_PATH + "/device/meta/:deviceId").handler(DeviceStateController::new);
+
         router.route(HttpMethod.POST, VIRTUAL_PATH + "/access-token").handler(CreateAccessTokenController::new);
 
+
         httpServer.requestHandler(router::accept).listen(config().getInteger("httpPort"));
-    }
-
-
-    private void getLastMessagesAsGeoJson(RoutingContext context) {
-        lastMessages(context, result -> {
-            if (result.failed()) {
-                LOGGER.error("an error occurred while making query", result.cause());
-                HttpHelper.getInternalServerError(context.response(), "internal server error").end();
-            }
-
-            GeoJsonResponseAdapter geoJsonAdapter = new GeoJsonResponseAdapter();
-            HttpHelper.getOK(context.response(), geoJsonAdapter.result(result.result()).toString());
-        });
-    }
-
-    private void getLastMessages(RoutingContext ctx) {
-        lastMessages(ctx, result -> {
-            if (result.failed()) {
-                LOGGER.error("an error occurred while making query", result.cause());
-                HttpHelper.getInternalServerError(ctx.response(), "internal server error").end();
-            }
-
-            HttpHelper.getOK(ctx.response(), result.result().toString()).end();
-        });
-    }
-
-    private void lastMessages(RoutingContext ctx, Handler<AsyncResult<List<JsonObject>>> handler) {
-        MessageRequest request;
-        try {
-            request = new MessageRequest(ctx.request());
-        } catch (Exception e) {
-            HttpHelper.getBadRequest(ctx.response(), e.getMessage()).end();
-            return;
-        }
-
-        MongoHelper.Query query;
-        try {
-            query = MongoHelper.getLastMessagesQuery(request.getSize(), request.getGpsStatus(), request.getDeviceId(), request.getFromDate(), request.getToDate());
-        } catch (ParseException e) {
-            HttpHelper.getBadRequest(ctx.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT).end();
-            return;
-        }
-
-        MongoClient mongoClient = Motodev.getInstance().newDbClient();
-        mongoClient.findWithOptions(Collection.MESSAGES, query.getQuery(), query.getFindOptions(), result -> {
-            handler.handle(result);
-            mongoClient.close();
-        });
     }
 
 }

@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
- * Created by yo on 08/07/2017.
+ * Created by oksuz on 08/07/2017.
  */
 public class LoginRequest {
 

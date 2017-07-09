@@ -13,7 +13,8 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 /**
- * Created by yo on 19/05/2017.
+ * Created by oksuz on 19/05/2017.
+ *
  */
 public class AppMain {
 

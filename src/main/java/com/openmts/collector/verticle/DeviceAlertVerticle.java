@@ -12,7 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by yo on 16/06/2017.
+ * Created by oksuz on 16/06/2017.
+ *
  */
 public class DeviceAlertVerticle extends MotodevAbstractVerticle {
 

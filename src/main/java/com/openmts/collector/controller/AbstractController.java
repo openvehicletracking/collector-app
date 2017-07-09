@@ -3,7 +3,7 @@ package com.openmts.collector.controller;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * Created by yo on 08/07/2017.
+ * Created by oksuz on 08/07/2017.
  */
 abstract public class AbstractController {
 
