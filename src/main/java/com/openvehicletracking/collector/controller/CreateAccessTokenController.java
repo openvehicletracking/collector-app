@@ -1,10 +1,10 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
-import com.openmts.collector.domain.LoginRequest;
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.collector.helper.MongoHelper;
-import com.openmts.core.Motodev;
-import com.openmts.core.db.Collection;
+import com.openvehicletracking.collector.domain.LoginRequest;
+import com.openvehicletracking.collector.helper.HttpHelper;
+import com.openvehicletracking.collector.helper.MongoHelper;
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.core.db.Collection;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -29,7 +29,7 @@ public class CreateAccessTokenController extends AbstractController {
 
     @Override
     public void response() {
-        client = Motodev.getInstance().newDbClient();
+        client = OpenVehicleTracker.getInstance().newDbClient();
         LoginRequest loginRequest = new LoginRequest(routingContext);
         MongoHelper.Query query = MongoHelper.getUserQuery(loginRequest.getUsername(), loginRequest.getEncodedPassword());
         client.find(Collection.USERS, query.getQuery(), getFindUserHandler(query));

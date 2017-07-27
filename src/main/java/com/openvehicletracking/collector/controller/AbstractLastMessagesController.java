@@ -1,10 +1,10 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
-import com.openmts.collector.domain.MessageRequest;
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.collector.helper.MongoHelper;
-import com.openmts.core.Motodev;
-import com.openmts.core.db.Collection;
+import com.openvehicletracking.collector.domain.MessageRequest;
+import com.openvehicletracking.collector.helper.HttpHelper;
+import com.openvehicletracking.collector.helper.MongoHelper;
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.core.db.Collection;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -34,7 +34,7 @@ abstract public class AbstractLastMessagesController extends AbstractController 
 
         JsonObject user = routingContext.get("user");
         if (!user.getJsonArray("devices").contains(request.getDeviceId())) {
-            HttpHelper.getUnauthorized(routingContext.response());
+            HttpHelper.getUnauthorized(routingContext.response()).end();
             return;
         }
 
@@ -46,7 +46,7 @@ abstract public class AbstractLastMessagesController extends AbstractController 
             return;
         }
 
-        MongoClient mongoClient = Motodev.getInstance().newDbClient();
+        MongoClient mongoClient = OpenVehicleTracker.getInstance().newDbClient();
         mongoClient.findWithOptions(Collection.MESSAGES, query.getQuery(), query.getFindOptions(), result -> {
             handler.handle(result);
             mongoClient.close();

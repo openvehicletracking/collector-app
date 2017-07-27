@@ -16,7 +16,7 @@ RUN mkdir -p /opt/app/config
 COPY config/* /opt/app/config/
 
 # copy app
-COPY build/libs/motodev-collector.jar /opt/app/motodev-collector.jar
+COPY build/libs/openvehicletracking.jar /opt/app/openvehicletracking.jar
 
 # init script
 COPY run.sh /opt/app/run.sh

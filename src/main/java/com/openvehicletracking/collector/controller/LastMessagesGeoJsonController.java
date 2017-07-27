@@ -1,7 +1,7 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.core.adapter.GeoJsonResponseAdapter;
+import com.openvehicletracking.collector.helper.HttpHelper;
+import com.openvehicletracking.core.adapter.GeoJsonResponseAdapter;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

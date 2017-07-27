@@ -1,8 +1,8 @@
-package com.openmts.collector.verticle;
+package com.openvehicletracking.collector.verticle;
 
-import com.openmts.collector.controller.*;
-import com.openmts.collector.filter.AuthorizationFilter;
-import com.openmts.core.MotodevAbstractVerticle;
+import com.openvehicletracking.collector.filter.AuthorizationFilter;
+import com.openvehicletracking.collector.controller.*;
+import com.openvehicletracking.core.TrackerAbstractVerticle;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by oksuz on 05/02/2017.
  *
  */
-public class HttpVerticle extends MotodevAbstractVerticle {
+public class HttpVerticle extends TrackerAbstractVerticle {
 
     private static final String VIRTUAL_PATH = "/api";
 

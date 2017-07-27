@@ -1,6 +1,6 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
-import com.openmts.collector.helper.HttpHelper;
+import com.openvehicletracking.collector.helper.HttpHelper;
 import io.vertx.ext.web.RoutingContext;
 
 /**

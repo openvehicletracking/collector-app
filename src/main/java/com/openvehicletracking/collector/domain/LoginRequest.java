@@ -1,4 +1,4 @@
-package com.openmts.collector.domain;
+package com.openvehicletracking.collector.domain;
 
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;

@@ -1,5 +1,7 @@
-package com.openmts.collector.verticle;
+package com.openvehicletracking.collector.verticle;
 
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.core.TrackerAbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -8,15 +10,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
-import com.openmts.core.Motodev;
-import com.openmts.core.MotodevAbstractVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by oksuz on 28/01/2017.
  */
-public class TcpVerticle extends MotodevAbstractVerticle {
+public class TcpVerticle extends TrackerAbstractVerticle {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TcpVerticle.class);
 
@@ -33,7 +33,6 @@ public class TcpVerticle extends MotodevAbstractVerticle {
     }
 
     private void connectHandler(NetSocket socket) {
-        LOGGER.debug("new incoming connection {} handled on instance {}", socket.toString(), this.toString());
         LOGGER.info("new incoming connection remoteaddr: {}:{}", socket.remoteAddress().host(), socket.remoteAddress().port());
         socket.handler(messageHandler(socket));
         socket.closeHandler(connectionCloseHandler(socket));
@@ -45,7 +44,7 @@ public class TcpVerticle extends MotodevAbstractVerticle {
     }
 
     private Handler<Buffer> messageHandler(NetSocket socket) {
-        return buffer -> vertx.eventBus().send(Motodev.Constant.NEW_MESSAGE, buffer, replyHandler(socket));
+        return buffer -> vertx.eventBus().send(OpenVehicleTracker.Constant.NEW_MESSAGE, buffer, replyHandler(socket));
     }
 
     private Handler<AsyncResult<Message<JsonArray>>> replyHandler(NetSocket socket) {

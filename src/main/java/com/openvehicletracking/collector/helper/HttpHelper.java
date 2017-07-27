@@ -1,4 +1,4 @@
-package com.openmts.collector.helper;
+package com.openvehicletracking.collector.helper;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpHeaders;

@@ -1,8 +1,8 @@
-package com.openmts.collector.filter;
+package com.openvehicletracking.collector.filter;
 
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.core.Motodev;
-import com.openmts.core.db.Collection;
+import com.openvehicletracking.collector.helper.HttpHelper;
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.core.db.Collection;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -44,7 +44,7 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         }
 
         String accessToken = request.getHeader("x-access-token");
-        MongoClient client = Motodev.getInstance().newDbClient();
+        MongoClient client = OpenVehicleTracker.getInstance().newDbClient();
         JsonObject query = new JsonObject().put("accessToken", accessToken);
 
         client.find(Collection.USERS, query, result -> {

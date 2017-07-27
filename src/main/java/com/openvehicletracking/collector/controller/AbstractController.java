@@ -1,4 +1,4 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
 import io.vertx.ext.web.RoutingContext;
 

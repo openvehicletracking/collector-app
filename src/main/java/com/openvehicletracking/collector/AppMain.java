@@ -1,10 +1,10 @@
-package com.openmts.collector;
+package com.openvehicletracking.collector;
 
-import com.openmts.collector.verticle.*;
+import com.openvehicletracking.collector.verticle.*;
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.device.xtakip.XTakip;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
-import com.openmts.core.Motodev;
-import com.openmts.device.xtakip.XTakip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,16 +43,16 @@ public class AppMain {
         DeploymentOptions workerDeploymentOptions = new DeploymentOptions().setWorker(true).setInstances(2);
         DeploymentOptions tcpDeployOpts = new DeploymentOptions().setInstances(5);
 
-        Motodev motodev = Motodev.create(jsonConf);
-        motodev.getDeviceRegistry().register(new XTakip());
+        OpenVehicleTracker tracker = OpenVehicleTracker.create(jsonConf);
+        tracker.getDeviceRegistry().register(new XTakip());
 
 
-        motodev.deployVerticle(TcpVerticle.class, tcpDeployOpts);
-        motodev.deployVerticle(HttpVerticle.class, tcpDeployOpts);
-        motodev.deployVerticle(NewMessageVerticle.class, workerDeploymentOptions);
-        motodev.deployVerticle(PersistVerticle.class, workerDeploymentOptions);
-        motodev.deployVerticle(DeviceCommandVerticle.class, workerDeploymentOptions);
-        motodev.deployVerticle(DeviceAlertVerticle.class, workerDeploymentOptions);
+        tracker.deployVerticle(TcpVerticle.class, tcpDeployOpts);
+        tracker.deployVerticle(HttpVerticle.class, tcpDeployOpts);
+        tracker.deployVerticle(NewMessageVerticle.class, workerDeploymentOptions);
+        tracker.deployVerticle(PersistVerticle.class, workerDeploymentOptions);
+        tracker.deployVerticle(DeviceCommandVerticle.class, workerDeploymentOptions);
+        tracker.deployVerticle(DeviceAlertVerticle.class, workerDeploymentOptions);
     }
 
 }

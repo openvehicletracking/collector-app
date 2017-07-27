@@ -1,8 +1,8 @@
-package com.openmts.collector.helper;
+package com.openvehicletracking.collector.helper;
 
+import com.openvehicletracking.core.GpsStatus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
-import com.openmts.core.GpsStatus;
 
 import java.util.Date;
 

@@ -1,8 +1,8 @@
-package com.openmts.collector.controller;
+package com.openvehicletracking.collector.controller;
 
-import com.openmts.collector.helper.HttpHelper;
-import com.openmts.core.Motodev;
-import com.openmts.core.db.Collection;
+import com.openvehicletracking.collector.helper.HttpHelper;
+import com.openvehicletracking.core.OpenVehicleTracker;
+import com.openvehicletracking.core.db.Collection;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -31,7 +31,7 @@ public class DeviceStateController extends AbstractController {
             return;
         }
 
-        client = Motodev.getInstance().newDbClient();
+        client = OpenVehicleTracker.getInstance().newDbClient();
         JsonObject query = new JsonObject().put("deviceId", deviceId);
         client.find(Collection.DEVICE_META, query, getDeviceMetaHandler());
     }

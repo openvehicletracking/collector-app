@@ -1,8 +1,8 @@
-package com.openmts.collector.domain;
+package com.openvehicletracking.collector.domain;
 
+import com.openvehicletracking.core.GpsStatus;
+import com.openvehicletracking.core.utility.DateUtility;
 import io.vertx.core.http.HttpServerRequest;
-import com.openmts.core.GpsStatus;
-import com.openmts.core.utility.DateUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
