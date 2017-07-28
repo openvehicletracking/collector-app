@@ -1,7 +1,7 @@
 group 'com.openvehicletracking'
 version '1.1.0-SNAPSHOT'
 
-def mainClassName = 'com.openmts.collector.AppMain'
+def mainClassName = 'com.openvehicletracking.collector.AppMain'
 def environment = project.hasProperty("env") ? project.property("env") : "local";
 
 
