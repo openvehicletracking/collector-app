@@ -1,0 +1,24 @@
+FROM ubuntu:16.04
+
+MAINTAINER MotoDev OpenMTS <motodevnet@gmail.com>
+
+RUN apt-get update -y
+RUN apt-get install -y default-jre gradle git
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
+
+RUN mkdir -p /opt/dependencies
+RUN mkdir -p /opt/source
+
+COPY * /opt/source/
+
+WORKDIR /opt/dependencies
+
+RUN git clone https://github.com/openvehicletracking/core.git core
+RUN git clone https://github.com/openvehicletracking/device-xtakip-impl.git xtakip
+RUN cd core && gradle clean install
+RUN cd ../xtakip && gradle clean install
+
+WORKDIR /opt/source
+
+CMD ["gradle", "clean", "build"]

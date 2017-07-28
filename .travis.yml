@@ -7,13 +7,6 @@ sudo: false
 services:
   - docker
 
-before_install:
-  - git clone https://github.com/openvehicletracking/core.git core
-  - git clone https://github.com/openvehicletracking/device-xtakip-impl.git xtakip
-  - cd core && gradle clean install
-  - cd ../xtakip && gradle clean install
-  - cd ../
-
 script: gradle clean build
 
 after_success:
