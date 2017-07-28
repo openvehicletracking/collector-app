@@ -19,5 +19,5 @@ script: gradle clean build
 
 after_success:
   - docker build -t openvehicletracking/collector .;
-    docker -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push openvehicletracking/collector;
