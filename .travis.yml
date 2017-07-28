@@ -8,12 +8,11 @@ services:
   - docker
 
 before_install:
-  - mkdir $HOME/dependencies
-  - git clone https://github.com/openvehicletracking/core.git core
-  - git clone https://github.com/openvehicletracking/device-xtakip-impl.git xtakip
-  - cd core && gradle clean install
-  - cd ../xtakip && gradle clean install
-  - cd ../openvehicletracking/collector-app
+  - git clone https://github.com/openvehicletracking/core.git $HOME/core
+  - git clone https://github.com/openvehicletracking/device-xtakip-impl.git $HOME/xtakip
+  - cd $HOME/core && gradle clean install
+  - cd $HOME/xtakip && gradle clean install
+  - cd $HOME/openvehicletracking/collector-app
 
 script: gradle clean build
 
