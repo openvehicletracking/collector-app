@@ -13,7 +13,7 @@ before_install:
   - git clone https://github.com/openvehicletracking/device-xtakip-impl.git xtakip
   - cd core && gradle clean install
   - cd ../xtakip && gradle clean install
-  - cd $HOME
+  - cd ../openvehicletracking/collector-app
 
 script: gradle clean build
 
