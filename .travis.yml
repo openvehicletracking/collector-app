@@ -9,10 +9,10 @@ services:
 
 before_install:
   - mkdir $HOME/dependencies
-  - git clone https://github.com/openvehicletracking/core.git
-  - git clone https://github.com/openvehicletracking/device-xtakip-impl.git
-  - cd $HOME/dependencies/core && gradle clean install
-  - cd $HOME/dependencies/device-xtakip-impl && gradle clean install
+  - git clone https://github.com/openvehicletracking/core.git core
+  - git clone https://github.com/openvehicletracking/device-xtakip-impl.git xtakip
+  - cd core && gradle clean install
+  - cd ../xtakip && gradle clean install
   - cd $HOME
 
 script: gradle clean build
