@@ -48,6 +48,7 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         JsonObject query = new JsonObject().put("accessToken", accessToken);
 
         client.find(Collection.USERS, query, result -> {
+            client.close();
            if (result.succeeded() && result.result() != null && result.result().size() > 0) {
                context.put("user", result.result().get(0));
                context.next();
