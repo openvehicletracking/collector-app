@@ -6,7 +6,9 @@
     "mongodb": {
       "host": "dockermongohost",
       "port": 27017,
-      "db_name": "motodevcollector"
+      "db_name": "motodevcollector",
+      "minPoolSize": 25,
+      "maxPoolSize": 100
     }
   }
 }
