@@ -6,7 +6,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 
 /**
- * Created by yo on 28/09/2017.
+ * Created by oksuz on 28/09/2017.
  */
 public class ResultCodec implements MessageCodec<Result, Result> {
 

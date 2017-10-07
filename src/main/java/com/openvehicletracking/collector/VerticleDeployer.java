@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by yo on 23/09/2017.
+ * Created by oksuz on 23/09/2017.
  */
 public class VerticleDeployer {
 

@@ -2,7 +2,7 @@ package com.openvehicletracking.collector.db;
 
 
 /**
- * Created by yo on 28/09/2017.
+ * Created by oksuz on 28/09/2017.
  */
 public class Result<T> {
 

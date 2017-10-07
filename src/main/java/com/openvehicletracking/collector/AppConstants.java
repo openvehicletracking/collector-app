@@ -1,9 +1,11 @@
 package com.openvehicletracking.collector;
 
 /**
- * Created by yo on 12/09/2017.
+ * Created by oksuz on 12/09/2017.
  */
 public class AppConstants {
+
+    public static final String MONGO_POOL_NAME = "collector_pool";
 
     public static class Events {
 
@@ -12,5 +14,7 @@ public class AppConstants {
         public static final String PERSIST = "db.persist";
         public static final String COMMAND_UPDATE = "db.update.command";
     }
+
+
 
 }

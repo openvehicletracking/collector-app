@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.List;
 
 /**
- * Created by yo on 09/07/2017.
+ * Created by oksuz on 09/07/2017.
  */
 public class AuthorizationFilter implements Handler<RoutingContext> {
 

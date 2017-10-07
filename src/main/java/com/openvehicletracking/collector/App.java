@@ -7,7 +7,7 @@ import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.db.Result;
 import com.openvehicletracking.collector.verticle.MongoVerticle;
-import com.openvehicletracking.collector.verticle.ParserVerticle;
+import com.openvehicletracking.collector.verticle.MessageProcessorVerticle;
 import com.openvehicletracking.collector.verticle.TcpVerticle;
 import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.device.xtakip.XTakip;
@@ -48,11 +48,17 @@ public class App {
         JsonObject jsonConf = new JsonObject(config);
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
 
-        DeploymentOptions workerDeploymentOptions = new DeploymentOptions().setWorker(true).setInstances(10).setConfig(jsonConf);
-        DeploymentOptions tcpDeployOpts = new DeploymentOptions().setInstances(5).setConfig(jsonConf);
+        DeploymentOptions workerDeploymentOptions = new DeploymentOptions()
+                .setWorker(true)
+                .setInstances(10)
+                .setConfig(jsonConf);
+
+        DeploymentOptions tcpDeployOpts = new DeploymentOptions()
+                .setInstances(5)
+                .setConfig(jsonConf);
+
 
         DeviceRegistry.getInstance().register(new XTakip());
-
 
         VerticleDeployer verticleDeployer = new VerticleDeployer(new VertxOptions());
 
@@ -62,7 +68,7 @@ public class App {
 
         verticleDeployer.deployVerticle(TcpVerticle.class, tcpDeployOpts);
         verticleDeployer.deployVerticle(MongoVerticle.class, workerDeploymentOptions);
-        verticleDeployer.deployVerticle(ParserVerticle.class, workerDeploymentOptions);
+        verticleDeployer.deployVerticle(MessageProcessorVerticle.class, workerDeploymentOptions);
 
     }
 

@@ -2,13 +2,19 @@ package com.openvehicletracking.collector.verticle;
 
 import com.google.gson.Gson;
 import com.openvehicletracking.collector.AppConstants;
+import com.openvehicletracking.collector.cache.DeviceStateCache;
 import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.db.Result;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.DeviceRegistry;
+import com.openvehicletracking.core.DeviceState;
+import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
 import com.openvehicletracking.core.message.MessageHandler;
+import com.openvehicletracking.core.message.Reply;
+import com.openvehicletracking.core.message.exception.UnsupportedReplyTypeException;
+import com.openvehicletracking.core.message.impl.StringCommandMessage;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
@@ -26,9 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by oksuz on 12/09/2017.
  *
  */
-public class ParserVerticle extends AbstractVerticle {
+public class MessageProcessorVerticle extends AbstractVerticle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParserVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessorVerticle.class);
 
     private static class DeviceAndHandlerFinder {
 
@@ -67,6 +73,7 @@ public class ParserVerticle extends AbstractVerticle {
     }
 
     private void handler(Message<Buffer> buffer) {
+        Gson gson = new Gson();
         String rawMessage = buffer.body().toString();
         DeviceAndHandlerFinder deviceAndHandlerFinder = new DeviceAndHandlerFinder(rawMessage);
 
@@ -100,18 +107,29 @@ public class ParserVerticle extends AbstractVerticle {
             vertx.eventBus().<Result<List<JsonObject>>>send(AppConstants.Events.NEW_QUERY, query, result -> {
                 if (result.succeeded()) {
                     Result<List<JsonObject>> commandsResult = result.result().body();
-                    List<String> commands = new ArrayList<>();
-                    commandsResult.getResult().forEach(json -> commands.add(json.getString("command")));
-                    buffer.reply(new Result<>(commands, false, null));
+                    List<StringCommandMessage> commands = new ArrayList<>();
+
+                    commandsResult.getResult().forEach(json -> commands.add(gson.fromJson(json.toString(), StringCommandMessage.class)));
+                    try {
+                        Reply<List<String>> replies = deviceAndHandlerFinder.getDevice().replyMessage(message, commands);
+                        buffer.reply(new Result<>(replies, false, null));
+                    } catch (UnsupportedReplyTypeException ignored) {}
+
                 }
             });
         }
 
-
         if (message.getClass() == deviceAndHandlerFinder.getDevice().getLocationType()) {
             record = new Record(MongoCollection.MESSAGES, new JsonObject(new Gson().toJson(message)));
             vertx.eventBus().send(AppConstants.Events.PERSIST, record);
+            try {
+                DeviceState state = deviceAndHandlerFinder.getDevice().createStateFromMessage(message);
+                if (state != null) {
+                    DeviceStateCache.getInstance().put(state);
+                }
+            } catch (UnsupportedMessageTypeException e) {
+                LOGGER.error("UnsupportedMessageTypeException", e);
+            }
         }
     }
-
 }

@@ -21,7 +21,9 @@ public class DeviceStateCache {
     }
 
     public void put(DeviceState deviceState) {
-        state.put(deviceState.getDeviceId(), deviceState);
+        if (deviceState.getDeviceId() != null && !"".equals(deviceState.getDeviceId().trim())) {
+            state.put(deviceState.getDeviceId(), deviceState);
+        }
     }
 
     public DeviceState get(String deviceId) {

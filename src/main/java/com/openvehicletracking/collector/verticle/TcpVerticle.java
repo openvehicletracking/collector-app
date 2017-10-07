@@ -2,6 +2,7 @@ package com.openvehicletracking.collector.verticle;
 
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.db.Result;
+import com.openvehicletracking.core.message.Reply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -12,8 +13,6 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Created by oksuz on 28/01/2017.
@@ -53,7 +52,7 @@ public class TcpVerticle extends AbstractVerticle {
         return buffer -> vertx.eventBus().send(AppConstants.Events.NEW_RAW_MESSAGE, buffer, replyHandler(socket));
     }
 
-    private Handler<AsyncResult<Message<Result<List<String>>>>> replyHandler(NetSocket socket) {
+    private Handler<AsyncResult<Message<Result<Reply<String>>>>> replyHandler(NetSocket socket) {
         return reply -> {
             if (reply.failed()) {
                 LOGGER.error("reply failed", reply.cause());
@@ -61,7 +60,7 @@ public class TcpVerticle extends AbstractVerticle {
             }
 
             try {
-                reply.result().body().getResult().forEach(socket::write);
+                reply.result().body().getResult().get().forEach(socket::write);
             } catch (Exception e) {
                 LOGGER.error("error while writing msg to socket : " + e.getMessage(), e);
             }

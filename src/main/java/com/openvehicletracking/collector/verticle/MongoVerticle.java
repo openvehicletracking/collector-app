@@ -29,7 +29,7 @@ public class MongoVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         JsonObject config = config().getJsonObject("database").getJsonObject("mongodb");
-        client = MongoClient.createNonShared(vertx, config);
+        client = MongoClient.createShared(vertx, config, AppConstants.MONGO_POOL_NAME);
 
         EventBus eventBus = vertx.eventBus();
 
