@@ -3,6 +3,7 @@ package com.openvehicletracking.collector.db;
 
 /**
  * Created by oksuz on 28/09/2017.
+ *
  */
 public class Result<T> {
 
@@ -28,4 +29,9 @@ public class Result<T> {
     public T getResult() {
         return result;
     }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
 }

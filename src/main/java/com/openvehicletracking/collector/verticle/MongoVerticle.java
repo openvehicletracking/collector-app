@@ -65,7 +65,7 @@ public class MongoVerticle extends AbstractVerticle {
 
     private <T> Handler<AsyncResult<T>> getResultHandler(Message<Query> queryMessage) {
         return result -> {
-            Result queryResult = new Result<>(result.result(), result.succeeded(), result.cause());
+            Result queryResult = new Result<>(result.result(), result.failed(), result.cause());
             queryMessage.reply(queryResult);
         };
     }

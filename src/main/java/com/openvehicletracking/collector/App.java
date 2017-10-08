@@ -6,6 +6,7 @@ import com.openvehicletracking.collector.codec.ResultCodec;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.db.Result;
+import com.openvehicletracking.collector.verticle.HttpVerticle;
 import com.openvehicletracking.collector.verticle.MongoVerticle;
 import com.openvehicletracking.collector.verticle.MessageProcessorVerticle;
 import com.openvehicletracking.collector.verticle.TcpVerticle;
@@ -69,6 +70,7 @@ public class App {
         verticleDeployer.deployVerticle(TcpVerticle.class, tcpDeployOpts);
         verticleDeployer.deployVerticle(MongoVerticle.class, workerDeploymentOptions);
         verticleDeployer.deployVerticle(MessageProcessorVerticle.class, workerDeploymentOptions);
+        verticleDeployer.deployVerticle(HttpVerticle.class, tcpDeployOpts);
 
     }
 

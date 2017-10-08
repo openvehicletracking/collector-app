@@ -35,8 +35,9 @@ public class Query implements Serializable {
         this.findOrder = findOrder;
     }
 
-    public void setFindOne(boolean findOne) {
+    public Query setFindOne(boolean findOne) {
         this.findOne = findOne;
+        return this;
     }
 
     public boolean isFindOne() {

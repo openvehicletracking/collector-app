@@ -6,6 +6,7 @@ package com.openvehicletracking.collector;
 public class AppConstants {
 
     public static final String MONGO_POOL_NAME = "collector_pool";
+    public static final String HEADER_ACCESS_TOKEN = "x-access-token";
 
     public static class Events {
 
