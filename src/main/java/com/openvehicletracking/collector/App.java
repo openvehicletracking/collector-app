@@ -57,9 +57,9 @@ public class App {
         VertxOptions vertxOptions = new VertxOptions()
                 .setClustered(true)
                 .setClusterManager(clusterManager)
-                .setEventLoopPoolSize(2)
+                .setEventLoopPoolSize(1)
                 .setHAEnabled(true)
-                .setWorkerPoolSize(4)
+                .setWorkerPoolSize(2)
                 .setHAGroup("openvehicletracking");
 
         new VerticleDeployer(vertxOptions, verticleDeployer -> {

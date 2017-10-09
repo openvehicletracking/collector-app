@@ -8,8 +8,8 @@
       "host": "dockermongohost",
       "port": 27017,
       "db_name": "motodevcollector",
-      "minPoolSize": 25,
-      "maxPoolSize": 100
+      "minPoolSize": 3,
+      "maxPoolSize": 30
     }
   },
   "verticles": [
@@ -18,21 +18,21 @@
       "options": {
         "instances": 1,
         "worker": true,
-        "ha": true
+        "ha": false
       }
     },
     {
       "id": "com.openvehicletracking.collector.verticle.HttpVerticle",
       "options": {
-        "instances": 2,
+        "instances": 1,
         "worker": false,
-        "ha": true
+        "ha": false
       }
     },
     {
       "id": "com.openvehicletracking.collector.verticle.MessageProcessorVerticle",
       "options": {
-        "instances": 4,
+        "instances": 1,
         "worker": true,
         "ha": true
       }
@@ -40,7 +40,7 @@
     {
       "id": "com.openvehicletracking.collector.verticle.MongoVerticle",
       "options": {
-        "instances": 5,
+        "instances": 1,
         "worker": true,
         "ha": true
       }
@@ -48,9 +48,9 @@
     {
       "id": "com.openvehicletracking.collector.verticle.TcpVerticle",
       "options": {
-        "instances": 4,
+        "instances": 1,
         "worker": false,
-        "ha": true
+        "ha": false
       }
     }
   ]
