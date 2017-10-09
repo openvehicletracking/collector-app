@@ -1,10 +1,13 @@
 package com.openvehicletracking.collector.verticle;
 
+import com.openvehicletracking.collector.http.Controller;
+import com.openvehicletracking.collector.http.controller.MessagesController;
+import com.openvehicletracking.collector.http.controller.UserController;
 import com.openvehicletracking.collector.http.filter.AuthorizationFilter;
+import com.openvehicletracking.collector.http.filter.DeviceFilter;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -14,7 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 
 /**
- * Created by yo on 07/10/2017.
+ * Created by oksuz on 07/10/2017.
+ *
  */
 public class HttpVerticle extends AbstractVerticle {
 
@@ -22,12 +26,15 @@ public class HttpVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        LOGGER.info("Starting verticle {} on port {}", HttpVerticle.class.getSimpleName(), config().getInteger("httpPort"));
+        final int httpPort = config().getInteger("httpPort", 9090);
+
+        LOGGER.info("Starting verticle {} on port {}", HttpVerticle.class.getSimpleName(), httpPort);
         HttpServer httpServer = vertx.createHttpServer();
 
         final String virtualPath = config().getString("virtualPath", "/api");
 
         HashSet<String> preAuthorisedPaths = new HashSet<>();
+
         preAuthorisedPaths.add(virtualPath + "/access-token");
 
         Router router = Router.router(vertx);
@@ -46,11 +53,15 @@ public class HttpVerticle extends AbstractVerticle {
 
         router.route().handler(AuthorizationFilter.create(preAuthorisedPaths));
 
-        router.route(HttpMethod.GET, virtualPath + "/hello").handler(context -> {
-            context.response().end(Json.encode(context.get("user")));
-        });
+        router.route(HttpMethod.GET, virtualPath + "/user").handler(Controller.of(UserController.class)::user);
+        router.route(HttpMethod.GET, virtualPath + "/user/checkpoint").handler(Controller.of(UserController.class)::checkpoint);
+        router.route(HttpMethod.POST, virtualPath + "/access-token").handler(Controller.of(UserController.class)::login);
+
+        router.route(virtualPath + "/device/:deviceId/*").handler(DeviceFilter.create("deviceId"));
+        router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/state").handler(Controller.of(MessagesController.class)::state);
+        router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages").handler(Controller.of(MessagesController.class)::lastMessages);
 
 
-        httpServer.requestHandler(router::accept).listen(config().getInteger("httpPort"));
+        httpServer.requestHandler(router::accept).listen(httpPort);
     }
 }

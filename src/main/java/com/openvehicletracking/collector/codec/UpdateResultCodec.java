@@ -1,36 +1,36 @@
 package com.openvehicletracking.collector.codec;
 
 import com.google.gson.Gson;
-import com.openvehicletracking.collector.db.Result;
+import com.openvehicletracking.collector.db.UpdateResult;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 
 /**
- * Created by oksuz on 28/09/2017.
+ * Created by yo on 08/10/2017.
  */
-public class ResultCodec implements MessageCodec<Result, Result> {
+public class UpdateResultCodec implements MessageCodec<UpdateResult, UpdateResult> {
 
     private final Gson gson = new Gson();
 
     @Override
-    public void encodeToWire(Buffer buffer, Result result) {
-        String rec = gson.toJson(result);
+    public void encodeToWire(Buffer buffer, UpdateResult updateResult) {
+        String rec = gson.toJson(updateResult);
         buffer.appendInt(rec.getBytes().length);
         buffer.appendString(rec);
     }
 
     @Override
-    public Result decodeFromWire(int pos, Buffer buffer) {
+    public UpdateResult decodeFromWire(int pos, Buffer buffer) {
         int length = buffer.getInt(pos);
         int begin = pos + 4;
         int end = begin + length;
         String toRecord = buffer.getString(begin, end);
-        return gson.fromJson(toRecord, Result.class);
+        return gson.fromJson(toRecord, UpdateResult.class);
     }
 
     @Override
-    public Result transform(Result result) {
-        return result;
+    public UpdateResult transform(UpdateResult updateResult) {
+        return updateResult;
     }
 
     @Override

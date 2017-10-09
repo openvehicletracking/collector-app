@@ -20,14 +20,6 @@
       }
     },
     {
-      "id": "com.openvehicletracking.collector.verticle.HttpVerticle",
-      "options": {
-        "instances": 10,
-        "worker": false,
-        "ha": true
-      }
-    },
-    {
       "id": "com.openvehicletracking.collector.verticle.MessageProcessorVerticle",
       "options": {
         "instances": 20,

@@ -1,20 +1,21 @@
 package com.openvehicletracking.collector;
 
+import com.openvehicletracking.collector.codec.AlarmCodec;
 import com.openvehicletracking.collector.codec.QueryCodec;
 import com.openvehicletracking.collector.codec.RecordCodec;
-import com.openvehicletracking.collector.codec.ResultCodec;
+import com.openvehicletracking.collector.codec.UpdateResultCodec;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.collector.db.Result;
-import com.openvehicletracking.collector.verticle.HttpVerticle;
-import com.openvehicletracking.collector.verticle.MongoVerticle;
-import com.openvehicletracking.collector.verticle.MessageProcessorVerticle;
-import com.openvehicletracking.collector.verticle.TcpVerticle;
+import com.openvehicletracking.collector.db.UpdateResult;
 import com.openvehicletracking.core.DeviceRegistry;
+import com.openvehicletracking.core.alarm.Alarm;
 import com.openvehicletracking.device.xtakip.XTakip;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,28 +50,32 @@ public class App {
         JsonObject jsonConf = new JsonObject(config);
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
 
-        DeploymentOptions workerDeploymentOptions = new DeploymentOptions()
-                .setWorker(true)
-                .setInstances(10)
-                .setConfig(jsonConf);
-
-        DeploymentOptions tcpDeployOpts = new DeploymentOptions()
-                .setInstances(5)
-                .setConfig(jsonConf);
-
 
         DeviceRegistry.getInstance().register(new XTakip());
+        ClusterManager clusterManager = new HazelcastClusterManager();
 
-        VerticleDeployer verticleDeployer = new VerticleDeployer(new VertxOptions());
+        new VerticleDeployer(new VertxOptions().setClustered(true).setClusterManager(clusterManager), verticleDeployer -> {
+            verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
+            verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
+            verticleDeployer.registerEventBusCodec(Alarm.class, new AlarmCodec());
+            verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
 
-        verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
-        verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
-        verticleDeployer.registerEventBusCodec(Result.class, new ResultCodec());
+            JsonArray verticles = jsonConf.getJsonArray("verticles");
+            verticles.forEach(v -> {
+                JsonObject verticleConfig = (JsonObject)v;
+                try {
+                    Class<?> verticleClass = Class.forName(verticleConfig.getString("id"));
+                    DeploymentOptions deploymentOptions = new DeploymentOptions(verticleConfig.getJsonObject("options"));
+                    deploymentOptions.setConfig(jsonConf);
+                    verticleDeployer.deployVerticle(verticleClass, deploymentOptions);
+                } catch (ClassNotFoundException e) {
+                    LOGGER.error("class not found", e);
+                }
+            });
 
-        verticleDeployer.deployVerticle(TcpVerticle.class, tcpDeployOpts);
-        verticleDeployer.deployVerticle(MongoVerticle.class, workerDeploymentOptions);
-        verticleDeployer.deployVerticle(MessageProcessorVerticle.class, workerDeploymentOptions);
-        verticleDeployer.deployVerticle(HttpVerticle.class, tcpDeployOpts);
+        });
+
+
 
     }
 

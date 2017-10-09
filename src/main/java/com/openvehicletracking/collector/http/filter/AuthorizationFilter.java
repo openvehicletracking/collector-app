@@ -3,7 +3,6 @@ package com.openvehicletracking.collector.http.filter;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Query;
-import com.openvehicletracking.collector.db.Result;
 import com.openvehicletracking.collector.helper.HttpHelper;
 import com.openvehicletracking.collector.http.domain.AccessToken;
 import com.openvehicletracking.collector.http.domain.User;
@@ -57,21 +56,20 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         String accessToken = request.getHeader(AppConstants.HEADER_ACCESS_TOKEN);
         Query query = new Query(MongoCollection.USERS, new JsonObject().put("accessTokens.token", accessToken)).setFindOne(true);
 
-        context.vertx().eventBus().<Result<JsonObject>>send(AppConstants.Events.NEW_QUERY, query, result -> {
-            Result<JsonObject> userResult = result.result().body();
-            if (userResult.isFailed()) {
+        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
+            JsonObject userResult = result.result().body();
+            if (result.failed()) {
                 LOGGER.error("user query failed", result.cause());
-                HttpHelper.getInternalServerError(response, userResult.getCause().getMessage()).end();
+                HttpHelper.getInternalServerError(response, result.cause().getMessage()).end();
                 return;
             }
 
-            JsonObject userJson = userResult.getResult();
-            if (userJson == null) {
+            if (userResult == null) {
                 HttpHelper.getUnauthorized(response).end();
                 return;
             }
 
-            User user = User.fromJson(userJson);
+            User user = User.fromJson(userResult);
             AccessToken userAccessToken = user.getAccessTokens().stream().filter(token -> Objects.equals(token.getToken(), accessToken)).findFirst().get();
             Date expireDate = new Date(userAccessToken.getExpireDate());
             if (expireDate.before(new Date())) {

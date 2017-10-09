@@ -3,16 +3,18 @@ package com.openvehicletracking.collector.verticle;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.collector.db.Result;
+import com.openvehicletracking.collector.db.UpdateResult;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +37,26 @@ public class MongoVerticle extends AbstractVerticle {
 
         MessageConsumer<Query> queryMessageConsumer = eventBus.consumer(AppConstants.Events.NEW_QUERY);
         MessageConsumer<Record> recordConsumer = eventBus.consumer(AppConstants.Events.PERSIST);
-        MessageConsumer<Record> commandUpdateConsumer = eventBus.consumer(AppConstants.Events.COMMAND_UPDATE);
+        MessageConsumer<Record> updateConsumer = eventBus.consumer(AppConstants.Events.UPDATE);
 
         queryMessageConsumer.handler(this::queryHandler);
         recordConsumer.handler(this::persistHandler);
-        commandUpdateConsumer.handler(this::commandUpdateHandler);
+        updateConsumer.handler(this::updateHandler);
     }
 
-    private void commandUpdateHandler(Message<Record> recordMessage) {
+    private void updateHandler(Message<Record> recordMessage) {
         Record record = recordMessage.body();
-        client.updateCollection(record.getCollection().getName(), record.getUpdateQuery().getQuery(), record.getRecord(), genericResultHandler());
+
+        if (record.getUpdateQuery().getQuery().containsKey("id")) {
+            String docId = record.getUpdateQuery().getQuery().getString("id");
+            record.getUpdateQuery().getQuery().put("_id", new JsonObject().put("$oid", docId)).remove("id");
+        }
+
+        client.updateCollection(record.getCollection().getName(), record.getUpdateQuery().getQuery(), record.getRecord(), result -> {
+            MongoClientUpdateResult mongoClientUpdateResult = result.result();
+            UpdateResult updateResult = new UpdateResult(mongoClientUpdateResult.getDocMatched(), mongoClientUpdateResult.getDocModified(), mongoClientUpdateResult.getDocUpsertedId());
+            recordMessage.reply(updateResult);
+        });
     }
 
     private void persistHandler(Message<Record> recordMessage) {
@@ -57,19 +69,21 @@ public class MongoVerticle extends AbstractVerticle {
         FindOptions findOptions = query.getFindOptions();
 
         if (queryMessage.body().isFindOne()) {
-            client.findOne(query.getCollection().getName(), query.getQuery(), null, getResultHandler(queryMessage));
+            client.findOne(query.getCollection().getName(), query.getQuery(), null, result -> {
+                if (result.failed()) {
+                    LOGGER.error("query error", result.cause());
+                }
+                queryMessage.reply(result.result());
+            });
         } else {
-            client.findWithOptions(query.getCollection().getName(), query.getQuery(), findOptions, getResultHandler(queryMessage));
+            client.findWithOptions(query.getCollection().getName(), query.getQuery(), findOptions, result -> {
+                if (result.failed()) {
+                    LOGGER.error("query error", result.cause());
+                }
+                queryMessage.reply(new JsonArray(result.result()));
+            });
         }
     }
-
-    private <T> Handler<AsyncResult<T>> getResultHandler(Message<Query> queryMessage) {
-        return result -> {
-            Result queryResult = new Result<>(result.result(), result.failed(), result.cause());
-            queryMessage.reply(queryResult);
-        };
-    }
-
 
     private static <T> Handler<AsyncResult<T>> genericResultHandler() {
         return result -> {

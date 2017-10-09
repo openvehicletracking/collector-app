@@ -1,5 +1,11 @@
 package com.openvehicletracking.collector.http.domain;
 
+import com.google.gson.Gson;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
+
 /**
  * Created by oksuz on 07/10/2017.
  *
@@ -8,10 +14,23 @@ public class AccessToken {
 
     private String token;
     private long expireDate;
+    private long createdAt;
 
-    public AccessToken(String token, long expireDate) {
+    public AccessToken(String token, long expireDate, long createdAt) {
         this.token = token;
         this.expireDate = expireDate;
+        this.createdAt = createdAt;
+    }
+
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
+    public static AccessToken createFor2Hours() {
+        long time = new Date().getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 2);
+        return new AccessToken(UUID.randomUUID().toString(), calendar.getTime().getTime(), time);
     }
 
     public String getToken() {
@@ -29,6 +48,15 @@ public class AccessToken {
 
     public AccessToken setExpireDate(long expireDate) {
         this.expireDate = expireDate;
+        return this;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public AccessToken setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
         return this;
     }
 

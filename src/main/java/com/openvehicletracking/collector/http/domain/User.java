@@ -30,6 +30,10 @@ public class User {
         return new Gson().fromJson(user.toString(), User.class);
     }
 
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
     public String getName() {
         return name;
     }

@@ -39,6 +39,7 @@ dependencies {
     compile 'io.vertx:vertx-core:' + vertxVersion
     compile 'io.vertx:vertx-web:' + vertxVersion
     compile 'io.vertx:vertx-mongo-client:' + vertxVersion
+    compile 'io.vertx:vertx-hazelcast:' + vertxVersion
     compile 'com.openvehicletracking:openvehicletracking-core:1.4.0-SNAPSHOT'
     compile 'com.openvehicletracking.device:xtakip:1.4.0-SNAPSHOT'
 }

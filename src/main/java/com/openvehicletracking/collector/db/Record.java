@@ -38,15 +38,17 @@ public class Record implements Serializable {
         return replaceQuery;
     }
 
-    public void setReplaceQuery(Query replaceQuery) {
+    public Record setReplaceQuery(Query replaceQuery) {
         this.replaceQuery = replaceQuery;
+        return this;
     }
 
     public Query getUpdateQuery() {
         return updateQuery;
     }
 
-    public void setUpdateQuery(Query updateQuery) {
+    public Record setUpdateQuery(Query updateQuery) {
         this.updateQuery = updateQuery;
+        return this;
     }
 }

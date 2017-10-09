@@ -6,10 +6,10 @@ import com.openvehicletracking.collector.cache.DeviceStateCache;
 import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.collector.db.Result;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.DeviceState;
+import com.openvehicletracking.core.alarm.Alarm;
 import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
 import com.openvehicletracking.core.message.MessageHandler;
 import com.openvehicletracking.core.message.Reply;
@@ -20,6 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +96,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             Query updateQuery = new Query(MongoCollection.COMMANDS, updateQueryJson);
 
             record = new Record(MongoCollection.COMMANDS, recordJson, updateQuery);
-            vertx.eventBus().send(AppConstants.Events.COMMAND_UPDATE, record);
+            vertx.eventBus().send(AppConstants.Events.UPDATE, record);
             return;
         }
 
@@ -104,18 +105,24 @@ public class MessageProcessorVerticle extends AbstractVerticle {
                     .put("read", false);
 
             Query query = new Query(MongoCollection.COMMANDS, queryJson);
-            vertx.eventBus().<Result<List<JsonObject>>>send(AppConstants.Events.NEW_QUERY, query, result -> {
-                if (result.succeeded()) {
-                    Result<List<JsonObject>> commandsResult = result.result().body();
-                    List<StringCommandMessage> commands = new ArrayList<>();
+            vertx.eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
+                if (result.failed()) { return; }
 
-                    commandsResult.getResult().forEach(json -> commands.add(gson.fromJson(json.toString(), StringCommandMessage.class)));
-                    try {
-                        Reply<List<String>> replies = deviceAndHandlerFinder.getDevice().replyMessage(message, commands);
-                        buffer.reply(new Result<>(replies, false, null));
-                    } catch (UnsupportedReplyTypeException ignored) {}
-
+                if (result.result().body() == null) {
+                    LOGGER.error("result body null");
+                    return;
                 }
+
+                List<StringCommandMessage> commands = new ArrayList<>();
+                result.result().body().stream().forEach(json -> commands.add(gson.fromJson(json.toString(), StringCommandMessage.class)));
+
+                Reply<String> replies = null;
+                try {
+                    replies = deviceAndHandlerFinder.getDevice().replyMessage(message, commands);
+                } catch (UnsupportedReplyTypeException ignored) {
+                    return;
+                }
+                buffer.reply(new JsonArray(replies.get()));
             });
         }
 
@@ -129,6 +136,11 @@ public class MessageProcessorVerticle extends AbstractVerticle {
                 }
             } catch (UnsupportedMessageTypeException e) {
                 LOGGER.error("UnsupportedMessageTypeException", e);
+            }
+
+            Alarm alarm = deviceAndHandlerFinder.getDevice().generateAlarmFromMessage(message);
+            if (alarm != null) {
+                vertx.eventBus().send(AppConstants.Events.ALARM, alarm);
             }
         }
     }

@@ -13,7 +13,8 @@ public class AppConstants {
         public static final String NEW_RAW_MESSAGE = "new.rawMessage";
         public static final String NEW_QUERY = "db.query";
         public static final String PERSIST = "db.persist";
-        public static final String COMMAND_UPDATE = "db.update.command";
+        public static final String UPDATE = "db.update";
+        public static String ALARM = "device.alarm";
     }
 
 
