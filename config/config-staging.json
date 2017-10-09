@@ -1,6 +1,7 @@
 {
   "collectorPort": 10001,
   "httpPort": 10002,
+  "apiVirtualPath": "/api",
   "collectorHost": "0.0.0.0",
   "database": {
     "mongodb": {

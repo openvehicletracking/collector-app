@@ -1,7 +1,7 @@
-package com.openvehicletracking.collector.domain;
+package com.openvehicletracking.collector.http.domain;
 
+import com.openvehicletracking.collector.helper.DateHelper;
 import com.openvehicletracking.core.GpsStatus;
-import com.openvehicletracking.core.utility.DateUtility;
 import io.vertx.core.http.HttpServerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by oksuz on 14/05/2017.
+ * Created by oksuz on 08/10/2017.
  *
  */
+
 public class MessageRequest {
 
     private HttpServerRequest request;
@@ -51,7 +52,7 @@ public class MessageRequest {
     public Date getFromDate() throws ParseException {
         Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
         if (d != null) {
-            return DateUtility.getBeginningOfDay(d);
+            return DateHelper.getBeginningOfDay(d);
         }
 
         return null;
@@ -61,7 +62,7 @@ public class MessageRequest {
     public Date getToDate() throws ParseException {
         Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
         if (d != null) {
-            return DateUtility.getEndOfDay(d);
+            return DateHelper.getEndOfDay(d);
         }
 
         return null;

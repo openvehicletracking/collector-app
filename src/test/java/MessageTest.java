@@ -1,7 +1,7 @@
 import org.junit.Test;
 
 /**
- * Created by yo on 04/07/2017.
+ * Created by oksuz on 04/07/2017.
  */
 public class MessageTest {
 
