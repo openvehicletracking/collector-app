@@ -1,5 +1,6 @@
 package com.openvehicletracking.collector.verticle;
 
+import com.google.gson.Gson;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Record;
@@ -28,7 +29,7 @@ public class AlarmVerticle extends AbstractVerticle {
     }
 
     private void alarmHandler(Message<Alarm> alarmMessage) {
-        Record record = new Record(MongoCollection.ALARMS, JsonObject.mapFrom(alarmMessage.body()));
+        Record record = new Record(MongoCollection.ALARMS, new JsonObject(new Gson().toJson(alarmMessage.body())));
         vertx.eventBus().send(AppConstants.Events.PERSIST, record);
     }
 }

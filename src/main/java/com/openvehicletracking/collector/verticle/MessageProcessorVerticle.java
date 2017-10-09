@@ -108,8 +108,8 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             vertx.eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
                 if (result.failed()) { return; }
 
-                if (result.result().body() == null) {
-                    LOGGER.error("result body null");
+                if (result.result().body() == null || result.result().body().size() == 0) {
+                    LOGGER.debug("reply result null or empty");
                     return;
                 }
 
@@ -122,7 +122,10 @@ public class MessageProcessorVerticle extends AbstractVerticle {
                 } catch (UnsupportedReplyTypeException ignored) {
                     return;
                 }
-                buffer.reply(new JsonArray(replies.get()));
+
+                if (replies != null) {
+                    buffer.reply(new JsonArray(replies.get()));
+                }
             });
         }
 
