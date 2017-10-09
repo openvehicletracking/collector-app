@@ -54,7 +54,15 @@ public class App {
         DeviceRegistry.getInstance().register(new XTakip());
         ClusterManager clusterManager = new HazelcastClusterManager();
 
-        new VerticleDeployer(new VertxOptions().setClustered(true).setClusterManager(clusterManager), verticleDeployer -> {
+        VertxOptions vertxOptions = new VertxOptions()
+                .setClustered(true)
+                .setClusterManager(clusterManager)
+                .setEventLoopPoolSize(2)
+                .setHAEnabled(true)
+                .setWorkerPoolSize(4)
+                .setHAGroup("openvehicletracking");
+
+        new VerticleDeployer(vertxOptions, verticleDeployer -> {
             verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
             verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
             verticleDeployer.registerEventBusCodec(Alarm.class, new AlarmCodec());

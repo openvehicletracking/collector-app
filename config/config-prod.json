@@ -11,5 +11,47 @@
       "minPoolSize": 25,
       "maxPoolSize": 100
     }
-  }
+  },
+  "verticles": [
+    {
+      "id": "com.openvehicletracking.collector.verticle.AlarmVerticle",
+      "options": {
+        "instances": 1,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.HttpVerticle",
+      "options": {
+        "instances": 2,
+        "worker": false,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.MessageProcessorVerticle",
+      "options": {
+        "instances": 4,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.MongoVerticle",
+      "options": {
+        "instances": 5,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.TcpVerticle",
+      "options": {
+        "instances": 4,
+        "worker": false,
+        "ha": true
+      }
+    }
+  ]
 }

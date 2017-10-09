@@ -1,7 +1,7 @@
 group 'com.openvehicletracking'
 version '1.3.0'
 
-def mainClassName = 'com.openvehicletracking.collector.AppMain'
+def mainClassName = 'com.openvehicletracking.collector.App'
 def environment = project.hasProperty("env") ? project.property("env") : "local";
 def vertxVersion = '3.4.1'
 
