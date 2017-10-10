@@ -13,7 +13,7 @@ import java.util.Objects;
 public class Query implements Serializable {
 
     private FindOptions findOptions = new FindOptions();
-    private JsonObject query;
+    private String query;
     private FindOrder findOrder = FindOrder.ASC;
     private MongoCollection collection;
     private boolean findOne = false;
@@ -22,7 +22,7 @@ public class Query implements Serializable {
         Objects.requireNonNull(collection, "collection cannot be null");
         Objects.requireNonNull(query, "query cannot be null");
         this.collection = collection;
-        this.query = query;
+        this.query = query.toString();
     }
 
     public Query(MongoCollection collection, JsonObject query, FindOptions findOptions) {
@@ -49,7 +49,7 @@ public class Query implements Serializable {
     }
 
     public JsonObject getQuery() {
-        return query;
+        return new JsonObject(query);
     }
 
     public FindOrder getFindOrder() {

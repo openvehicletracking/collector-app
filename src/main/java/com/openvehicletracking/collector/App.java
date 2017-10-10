@@ -59,7 +59,7 @@ public class App {
                 .setClusterManager(clusterManager)
                 .setEventLoopPoolSize(1)
                 .setHAEnabled(true)
-                .setWorkerPoolSize(2)
+                .setWorkerPoolSize(1)
                 .setHAGroup("openvehicletracking");
 
         String clusterHost = System.getProperty("cluster-host");

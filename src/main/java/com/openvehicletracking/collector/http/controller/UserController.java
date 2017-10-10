@@ -1,7 +1,10 @@
 package com.openvehicletracking.collector.http.controller;
 
 import com.openvehicletracking.collector.AppConstants;
-import com.openvehicletracking.collector.db.*;
+import com.openvehicletracking.collector.db.MongoCollection;
+import com.openvehicletracking.collector.db.Query;
+import com.openvehicletracking.collector.db.Record;
+import com.openvehicletracking.collector.db.UpdateResult;
 import com.openvehicletracking.collector.helper.HttpHelper;
 import com.openvehicletracking.collector.http.domain.AccessToken;
 import com.openvehicletracking.collector.http.domain.LoginRequest;
@@ -60,22 +63,26 @@ public class UserController {
             User user = User.fromJson(userResult);
             AccessToken token = AccessToken.createFor2Hours();
 
-            Record record = new Record(MongoCollection.USERS, new JsonObject().put("$push", new JsonObject().put("accessTokens", JsonObject.mapFrom(token))))
-                .setUpdateQuery(new Query(MongoCollection.USERS, new JsonObject().put("id", user.getId())));
+            JsonObject jsonRecord = new JsonObject()
+                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.toJson())));
+
+            Record record = new Record(MongoCollection.USERS, jsonRecord)
+                .setUpdateQuery(new Query(MongoCollection.USERS, new JsonObject().put("_id", user.getId())));
 
             context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.UPDATE, record, res -> {
-                UpdateResult updateResult = res.result().body();
-
                 if (res.failed()) {
                     HttpHelper.getInternalServerError(context.response(), res.cause().getMessage()).end();
-                } else if (updateResult.getDocModified() > 0) {
+                    return;
+                }
+
+                UpdateResult updateResult = res.result().body();
+                 if (updateResult.getDocModified() > 0) {
                     HttpHelper.getOK(context.response(), token.toJson()).end();
                 } else {
                     HttpHelper.getInternalServerError(context.response(), "unkown error").end();
                 }
             });
         });
-
     }
 
 }

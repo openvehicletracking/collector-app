@@ -4,6 +4,7 @@ package com.openvehicletracking.collector.db;
 import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by oksuz on 23/09/2017.
@@ -12,13 +13,14 @@ import java.io.Serializable;
 public class Record implements Serializable {
 
     private final MongoCollection collection;
-    private final JsonObject record;
+    private final String record;
     private Query replaceQuery;
     private Query updateQuery;
 
     public Record(MongoCollection collection, JsonObject record) {
+        Objects.requireNonNull(record, "recorc cannot be null");
         this.collection = collection;
-        this.record = record;
+        this.record = record.toString();
     }
 
     public Record(MongoCollection collection, JsonObject record, Query replaceQuery) {
@@ -31,7 +33,7 @@ public class Record implements Serializable {
     }
 
     public JsonObject getRecord() {
-        return record;
+        return new JsonObject(record);
     }
 
     public Query getReplaceQuery() {

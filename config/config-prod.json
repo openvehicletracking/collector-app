@@ -8,8 +8,8 @@
       "host": "dockermongohost",
       "port": 27017,
       "db_name": "motodevcollector",
-      "minPoolSize": 3,
-      "maxPoolSize": 30
+      "minPoolSize": 1,
+      "maxPoolSize": 5
     }
   },
   "verticles": [
