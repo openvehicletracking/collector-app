@@ -62,6 +62,12 @@ public class App {
                 .setWorkerPoolSize(2)
                 .setHAGroup("openvehicletracking");
 
+        String clusterHost = System.getProperty("cluster-host");
+        if (clusterHost != null) {
+            LOGGER.info("cluster host is {}", clusterHost);
+            vertxOptions.setClusterHost(clusterHost).setClusterPort(15701);
+        }
+
         new VerticleDeployer(vertxOptions, verticleDeployer -> {
             verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
             verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());

@@ -46,12 +46,12 @@ public class UserController {
         Query query = new Query(MongoCollection.USERS, queryJson).setFindOne(true);
 
         context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
-            JsonObject userResult = result.result().body();
             if (result.failed()) {
                 HttpHelper.getInternalServerError(context.response(), result.cause().getMessage()).end();
                 return;
             }
 
+            JsonObject userResult = result.result().body();
             if (userResult == null) {
                 HttpHelper.getNotFound(context.response(), "user not found").end();
                 return;
