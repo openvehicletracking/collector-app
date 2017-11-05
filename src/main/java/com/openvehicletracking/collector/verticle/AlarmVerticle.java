@@ -29,7 +29,10 @@ public class AlarmVerticle extends AbstractVerticle {
     }
 
     private void alarmHandler(Message<Alarm> alarmMessage) {
-        Record record = new Record(MongoCollection.ALARMS, new JsonObject(new Gson().toJson(alarmMessage.body())));
+        JsonObject alert = new JsonObject(new Gson().toJson(alarmMessage.body()));
+        Record record = new Record(MongoCollection.ALARMS, alert);
         vertx.eventBus().send(AppConstants.Events.PERSIST, record);
+
+        LOGGER.debug("new alert fired {}", alert.encodePrettily());
     }
 }
