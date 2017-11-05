@@ -54,7 +54,6 @@ public class TcpVerticle extends AbstractVerticle {
     private Handler<AsyncResult<Message<JsonArray>>> replyHandler(NetSocket socket) {
         return reply -> {
             if (reply.failed()) {
-                LOGGER.debug("reply failed", reply.cause());
                 return;
             }
 
