@@ -1,6 +1,9 @@
 package com.openvehicletracking.collector.cache;
 
+import com.google.gson.JsonParser;
 import com.openvehicletracking.core.DeviceState;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,5 +31,21 @@ public class DeviceStateCache {
 
     public DeviceState get(String deviceId) {
         return state.get(deviceId);
+    }
+
+    public JsonArray getAllAsJson() {
+        JsonArray data = new JsonArray();
+        state.forEach((deviceId, state) -> data.add(new JsonObject(state.toJson().toString())));
+        return data;
+    }
+
+    public void load(JsonArray data) {
+        state.clear();
+        JsonParser parser = new JsonParser();
+        for (int i = 0; i < data.size(); i++) {
+            JsonObject deviceStateJson = data.getJsonObject(i);
+            DeviceState deviceState = DeviceState.fromJson(parser.parse(deviceStateJson.toString()).getAsJsonObject());
+            put(deviceState);
+        }
     }
 }
