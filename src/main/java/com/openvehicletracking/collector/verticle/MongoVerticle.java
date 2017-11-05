@@ -47,18 +47,34 @@ public class MongoVerticle extends AbstractVerticle {
     private void updateHandler(Message<Record> recordMessage) {
         Record record = recordMessage.body();
 
-        JsonObject updateQuery = record.getUpdateQuery().getQuery();
+        Query update = record.getUpdateQuery();
+        Query replace = record.getReplaceQuery();
+        JsonObject query;
 
-        if (updateQuery.containsKey("_id")) {
-            String docId = updateQuery.getString("_id");
-            updateQuery.put("_id", new JsonObject().put("$oid", docId)).remove("id");
+        if (update != null) {
+            query = update.getQuery();
+            replaceIdToMongoId(query);
+            client.updateCollection(record.getCollection().getName(), query, record.getRecord(), getUpdateResultHandler(recordMessage));
+        } else if (replace != null) {
+            query = replace.getQuery();
+            replaceIdToMongoId(query);
+            client.replaceDocuments(record.getCollection().getName(), query, record.getRecord(), getUpdateResultHandler(recordMessage));
         }
+    }
 
-        client.updateCollection(record.getCollection().getName(), updateQuery, record.getRecord(), result -> {
+    private void replaceIdToMongoId(JsonObject query) {
+        if (query != null && query.containsKey("_id")) {
+            String docId = query.getString("_id");
+            query.put("_id", new JsonObject().put("$oid", docId)).remove("id");
+        }
+    }
+
+    private Handler<AsyncResult<MongoClientUpdateResult>> getUpdateResultHandler(Message<Record> recordMessage) {
+        return result -> {
             MongoClientUpdateResult mongoClientUpdateResult = result.result();
             UpdateResult updateResult = new UpdateResult(mongoClientUpdateResult.getDocMatched(), mongoClientUpdateResult.getDocModified(), mongoClientUpdateResult.getDocUpsertedId());
             recordMessage.reply(updateResult);
-        });
+        };
     }
 
     private void persistHandler(Message<Record> recordMessage) {
