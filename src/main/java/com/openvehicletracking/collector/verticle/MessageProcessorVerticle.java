@@ -74,7 +74,6 @@ public class MessageProcessorVerticle extends AbstractVerticle {
     }
 
     private void handler(Message<Buffer> buffer) {
-        Gson gson = new Gson();
         String rawMessage = buffer.body().toString();
         DeviceAndHandlerFinder deviceAndHandlerFinder = new DeviceAndHandlerFinder(rawMessage);
 
@@ -86,65 +85,112 @@ public class MessageProcessorVerticle extends AbstractVerticle {
         LOGGER.debug("Handler {} found for message {}", deviceAndHandlerFinder.getHandler().getClass().getCanonicalName(), rawMessage);
         com.openvehicletracking.core.message.Message message = deviceAndHandlerFinder.getHandler().handle(rawMessage);
 
-        Record record;
-        if (message.isCommand()) {
-            JsonObject updateQueryJson = new JsonObject().put("deviceId", message.getDeviceId())
-                    .put("requestId", message.getRequestId())
-                    .put("read", false);
 
-            JsonObject recordJson = new JsonObject(new Gson().toJson(message)).put("read", true);
-            Query updateQuery = new Query(MongoCollection.COMMANDS, updateQueryJson);
+        try {
+            createAlertIfRequired(message, deviceAndHandlerFinder);
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while creating alert", e);
+        }
 
-            record = new Record(MongoCollection.COMMANDS, recordJson, updateQuery);
-            vertx.eventBus().send(AppConstants.Events.UPDATE, record);
+        try {
+            updateIfCommand(message);
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while updating command", e);
+        }
+
+        try {
+            replyIfRequired(message, buffer, deviceAndHandlerFinder);
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while replying", e);
+        }
+
+        try {
+            persistIfLocationMessage(message, deviceAndHandlerFinder);
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while persisting message", e);
+        }
+
+        try {
+            createStateFromMessage(message, deviceAndHandlerFinder);
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while creating state", e);
+        }
+
+    }
+
+    private void createStateFromMessage(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
+        try {
+            DeviceState state = deviceAndHandlerFinder.getDevice().createStateFromMessage(message);
+            if (state != null) {
+                DeviceStateCache.getInstance().put(state);
+            }
+        } catch (UnsupportedMessageTypeException e) {
+            LOGGER.debug("UnsupportedMessageTypeException", e);
+        }
+    }
+
+    private void persistIfLocationMessage(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
+        if (message.getClass() == deviceAndHandlerFinder.getDevice().getLocationType()) {
+            Record record = new Record(MongoCollection.MESSAGES, new JsonObject(new Gson().toJson(message)));
+            vertx.eventBus().send(AppConstants.Events.PERSIST, record);
+        }
+    }
+
+    private void createAlertIfRequired(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
+        Alarm alarm = deviceAndHandlerFinder.getDevice().generateAlarmFromMessage(message);
+        if (alarm != null) {
+            vertx.eventBus().send(AppConstants.Events.ALARM, alarm);
+        }
+    }
+
+    private void replyIfRequired(com.openvehicletracking.core.message.Message message, Message<Buffer> buffer, DeviceAndHandlerFinder deviceAndHandlerFinder) {
+        if (!message.isReplyRequired()) {
+            LOGGER.debug("no reply required {}", message);
             return;
         }
 
-        if (message.isReplyRequired()) {
-            JsonObject queryJson = new JsonObject().put("deviceId", message.getDeviceId())
-                    .put("read", false);
+        JsonObject queryJson = new JsonObject().put("deviceId", message.getDeviceId())
+                .put("isRead", false);
 
-            Query query = new Query(MongoCollection.COMMANDS, queryJson);
-            vertx.eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
-                if (result.failed()) { return; }
+        Query query = new Query(MongoCollection.COMMANDS, queryJson);
+        vertx.eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
+            if (result.failed()) { return; }
 
-                if (result.result().body() == null || result.result().body().size() == 0) {
-                    LOGGER.debug("reply result null or empty");
-                    return;
-                }
+            if (result.result().body() == null || result.result().body().size() == 0) {
+                LOGGER.debug("reply result null or empty");
+                return;
+            }
 
-                List<StringCommandMessage> commands = new ArrayList<>();
-                result.result().body().stream().forEach(json -> commands.add(gson.fromJson(json.toString(), StringCommandMessage.class)));
+            List<StringCommandMessage> commands = new ArrayList<>();
+            result.result().body().stream().forEach(json -> commands.add(new Gson().fromJson(json.toString(), StringCommandMessage.class)));
 
-                Reply<String> replies = null;
-                try {
-                    replies = deviceAndHandlerFinder.getDevice().replyMessage(message, commands);
-                } catch (UnsupportedReplyTypeException ignored) {
-                    return;
-                }
-
-                if (replies != null) {
-                    buffer.reply(new JsonArray(replies.get()));
-                }
-            });
-        }
-
-        if (message.getClass() == deviceAndHandlerFinder.getDevice().getLocationType()) {
-            record = new Record(MongoCollection.MESSAGES, new JsonObject(new Gson().toJson(message)));
-            vertx.eventBus().send(AppConstants.Events.PERSIST, record);
+            Reply<String> replies = null;
             try {
-                DeviceState state = deviceAndHandlerFinder.getDevice().createStateFromMessage(message);
-                if (state != null) {
-                    DeviceStateCache.getInstance().put(state);
-                }
-            } catch (UnsupportedMessageTypeException e) {
-                LOGGER.error("UnsupportedMessageTypeException", e);
+                replies = deviceAndHandlerFinder.getDevice().replyMessage(message, commands);
+            } catch (UnsupportedReplyTypeException ignored) {
+                return;
             }
 
-            Alarm alarm = deviceAndHandlerFinder.getDevice().generateAlarmFromMessage(message);
-            if (alarm != null) {
-                vertx.eventBus().send(AppConstants.Events.ALARM, alarm);
+            if (replies != null) {
+                buffer.reply(new JsonArray(replies.get()));
             }
+        });
+    }
+
+    private void updateIfCommand(com.openvehicletracking.core.message.Message message) {
+        if (!message.isCommand()) {
+            LOGGER.debug("message is not command {}", message);
+            return;
         }
+
+        JsonObject updateQueryJson = new JsonObject().put("deviceId", message.getDeviceId())
+                .put("requestId", message.getRequestId().get())
+                .put("isRead", false);
+
+        JsonObject recordJson = new JsonObject(new Gson().toJson(message)).put("isRead", true);
+        Query updateQuery = new Query(MongoCollection.COMMANDS, updateQueryJson);
+
+        Record record = new Record(MongoCollection.COMMANDS, recordJson, updateQuery);
+        vertx.eventBus().send(AppConstants.Events.UPDATE, record);
     }
 }
