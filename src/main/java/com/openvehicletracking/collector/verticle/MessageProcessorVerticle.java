@@ -139,6 +139,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
     private void createAlertIfRequired(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         Alarm alarm = deviceAndHandlerFinder.getDevice().generateAlarmFromMessage(message);
         if (alarm != null) {
+            LOGGER.debug("alert generated from message {}", alarm);
             vertx.eventBus().send(AppConstants.Events.ALARM, alarm);
         }
     }

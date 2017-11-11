@@ -29,6 +29,7 @@ public class VerticleDeployer {
 
     public <T> void registerEventBusCodec(Class<T> clazz, MessageCodec codec) {
         vertx.eventBus().registerDefaultCodec(clazz, codec);
+        LOGGER.debug("Registering event bus codec {}", clazz.getCanonicalName());
     }
 
     public <T> void  deployVerticle(Class<T> verticle, DeploymentOptions deploymentOptions) {

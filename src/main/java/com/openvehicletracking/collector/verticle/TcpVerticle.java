@@ -48,7 +48,10 @@ public class TcpVerticle extends AbstractVerticle {
     }
 
     private Handler<Buffer> messageHandler(NetSocket socket) {
-        return buffer -> vertx.eventBus().send(AppConstants.Events.NEW_RAW_MESSAGE, buffer, replyHandler(socket));
+        return buffer -> {
+            LOGGER.debug("Message sending event bus topic: {}, message: {}", AppConstants.Events.NEW_RAW_MESSAGE, new String(buffer.getBytes()));
+            vertx.eventBus().send(AppConstants.Events.NEW_RAW_MESSAGE, buffer, replyHandler(socket));
+        };
     }
 
     private Handler<AsyncResult<Message<JsonArray>>> replyHandler(NetSocket socket) {
@@ -58,7 +61,11 @@ public class TcpVerticle extends AbstractVerticle {
             }
 
             try {
-                reply.result().body().forEach(cmd -> socket.write(String.valueOf(cmd)));
+                reply.result().body().forEach(cmd -> {
+                    String r = String.valueOf(cmd);
+                    LOGGER.debug("writing reply `{}` on socket {}", socket.remoteAddress());
+                    socket.write(r);
+                });
             } catch (Exception e) {
                 LOGGER.error("error while writing msg to socket : " + e.getMessage(), e);
             }
