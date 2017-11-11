@@ -72,8 +72,13 @@ public class MongoVerticle extends AbstractVerticle {
     private Handler<AsyncResult<MongoClientUpdateResult>> getUpdateResultHandler(Message<Record> recordMessage) {
         return result -> {
             MongoClientUpdateResult mongoClientUpdateResult = result.result();
-            UpdateResult updateResult = new UpdateResult(mongoClientUpdateResult.getDocMatched(), mongoClientUpdateResult.getDocModified(), mongoClientUpdateResult.getDocUpsertedId());
-            recordMessage.reply(updateResult);
+            if (mongoClientUpdateResult != null) {
+                UpdateResult updateResult = new UpdateResult(mongoClientUpdateResult.getDocMatched(), mongoClientUpdateResult.getDocModified(), mongoClientUpdateResult.getDocUpsertedId());
+                recordMessage.reply(updateResult);
+                return;
+            }
+
+            LOGGER.error("Update query error", result.cause());
         };
     }
 

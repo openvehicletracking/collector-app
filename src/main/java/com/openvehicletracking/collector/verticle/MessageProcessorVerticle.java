@@ -188,10 +188,12 @@ public class MessageProcessorVerticle extends AbstractVerticle {
                 .put("requestId", message.getRequestId().get())
                 .put("isRead", false);
 
-        JsonObject recordJson = new JsonObject(new Gson().toJson(message)).put("isRead", true);
-        Query updateQuery = new Query(MongoCollection.COMMANDS, updateQueryJson);
+        JsonObject recordJson = new JsonObject();
+        recordJson.put("$set", new JsonObject(new Gson().toJson(message)).put("isRead", true));
 
-        Record record = new Record(MongoCollection.COMMANDS, recordJson, updateQuery);
+        Record record = new Record(MongoCollection.COMMANDS, recordJson, null)
+                .setUpdateQuery(new Query(MongoCollection.COMMANDS, updateQueryJson));
+
         vertx.eventBus().send(AppConstants.Events.UPDATE, record);
     }
 }
