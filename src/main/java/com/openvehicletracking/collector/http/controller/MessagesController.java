@@ -9,7 +9,12 @@ import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.helper.HttpHelper;
 import com.openvehicletracking.collector.http.domain.MessageRequest;
 import com.openvehicletracking.collector.http.domain.UserDevice;
+import com.openvehicletracking.core.Device;
+import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.DeviceState;
+import com.openvehicletracking.core.GpsStatus;
+import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
+import com.openvehicletracking.core.message.LocationMessage;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -24,16 +29,42 @@ import java.text.ParseException;
 public class MessagesController {
 
     public void state(RoutingContext context) {
+        final Gson gson = new Gson();
         UserDevice device = context.get("device");
         DeviceState state = DeviceStateCache.getInstance().get(device.getSerial());
 
-        if (state == null) {
-            HttpHelper.getNotFound(context.response(), "device state not found");
+        if (state != null) {
+            HttpHelper.getOK(context.response(), gson.toJson(state)).end();
             return;
         }
 
+        Device deviceImpl = DeviceRegistry.getInstance().findDevice(device.getDevice());
 
-        HttpHelper.getOK(context.response(), new Gson().toJson(state)).end();
+        JsonObject query = new JsonObject();
+        query.put("deviceId", device.getSerial())
+                .put("device", device.getDevice())
+                .put("status", GpsStatus.VALID);
+
+        FindOptions findOptions = new FindOptions();
+        findOptions.setSort(new JsonObject().put("datetime", FindOrder.DESC.getValue()));
+
+        Query deviceMessageQuery = new Query(MongoCollection.MESSAGES, query, findOptions).setFindOne(true);
+
+        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, deviceMessageQuery, messageResult -> {
+            if (messageResult.result().body() != null) {
+                LocationMessage locationMessage = LocationMessage.fromJson(messageResult.result().body().toString(), deviceImpl.getLocationType());
+                try {
+                    DeviceState stateFromDbMessage = deviceImpl.createStateFromMessage(locationMessage);
+                    HttpHelper.getOK(context.response(), gson.toJson(stateFromDbMessage)).end();
+                    DeviceStateCache.getInstance().put(stateFromDbMessage);
+                } catch (UnsupportedMessageTypeException ignored) {
+                    HttpHelper.getInternalServerError(context.response(), "device state not found");
+                }
+            } else {
+                HttpHelper.getNotFound(context.response(), "device state not found").end();
+            }
+        });
+
     }
 
     public void lastMessages(RoutingContext context) {
@@ -74,6 +105,5 @@ public class MessagesController {
             JsonArray messagesResult = result.result().body();
             HttpHelper.getOK(context.response(), messagesResult.toString()).end();
         });
-
     }
 }
