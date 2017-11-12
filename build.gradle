@@ -42,6 +42,8 @@ dependencies {
     compile 'io.vertx:vertx-hazelcast:' + vertxVersion
     compile 'com.openvehicletracking:openvehicletracking-core:1.4.0-SNAPSHOT'
     compile 'com.openvehicletracking.device:xtakip:1.4.2-SNAPSHOT'
+    compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.6.3'
+
 }
 
 shadowJar {
