@@ -120,8 +120,10 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void createStateFromMessage(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         try {
+            LOGGER.debug("State genrating for message", message);
             DeviceState state = deviceAndHandlerFinder.getDevice().createStateFromMessage(message);
             if (state != null) {
+                LOGGER.debug("State generated {}, {}", message, state);
                 DeviceStateCache.getInstance().put(state);
             }
         } catch (UnsupportedMessageTypeException e) {
@@ -146,7 +148,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void replyIfRequired(com.openvehicletracking.core.message.Message message, Message<Buffer> buffer, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         if (!message.isReplyRequired()) {
-            LOGGER.debug("no reply required {}", message);
+            LOGGER.debug("reply is not required");
             return;
         }
 
@@ -158,7 +160,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             if (result.failed()) { return; }
 
             if (result.result().body() == null || result.result().body().size() == 0) {
-                LOGGER.debug("reply result null or empty");
+                LOGGER.debug("empty result set returned from commands");
                 return;
             }
 
@@ -180,7 +182,6 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void updateIfCommand(com.openvehicletracking.core.message.Message message) {
         if (!message.isCommand()) {
-            LOGGER.debug("message is not command {}", message);
             return;
         }
 
@@ -195,5 +196,6 @@ public class MessageProcessorVerticle extends AbstractVerticle {
                 .setUpdateQuery(new Query(MongoCollection.COMMANDS, updateQueryJson));
 
         vertx.eventBus().send(AppConstants.Events.UPDATE, record);
+        LOGGER.debug("updating command {}", record);
     }
 }

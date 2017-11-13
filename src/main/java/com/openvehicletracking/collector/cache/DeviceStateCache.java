@@ -6,6 +6,8 @@ import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openvehicletracking.core.DeviceState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by oksuz on 28/09/2017.
@@ -14,6 +16,8 @@ import com.openvehicletracking.core.DeviceState;
 public class DeviceStateCache {
 
     private static final String SHARED_MAP_NAME = "mts.devicestate";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceStateCache.class);
 
     private final IMap<String, DeviceState> state;
     private static final DeviceStateCache INSTANCE = new DeviceStateCache();
@@ -30,6 +34,7 @@ public class DeviceStateCache {
     public void put(DeviceState deviceState) {
         if (deviceState.getDeviceId() != null && !"".equals(deviceState.getDeviceId().trim())) {
             state.put(deviceState.getDeviceId(), deviceState);
+            LOGGER.debug("State put {}, {}", deviceState.getDeviceId(), deviceState);
         }
     }
 

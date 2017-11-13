@@ -63,7 +63,7 @@ public class TcpVerticle extends AbstractVerticle {
             try {
                 reply.result().body().forEach(cmd -> {
                     String r = String.valueOf(cmd);
-                    LOGGER.debug("writing reply `{}` on socket {}", socket.remoteAddress());
+                    LOGGER.debug("Writing reply `{}` on socket `{}`", r, socket.remoteAddress());
                     socket.write(r);
                 });
             } catch (Exception e) {

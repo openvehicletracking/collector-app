@@ -19,6 +19,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 
@@ -27,6 +29,8 @@ import java.text.ParseException;
  *
  */
 public class MessagesController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessagesController.class);
 
     public void state(RoutingContext context) {
         final Gson gson = new Gson();

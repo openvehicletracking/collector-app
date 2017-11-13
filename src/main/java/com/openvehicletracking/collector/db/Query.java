@@ -59,4 +59,12 @@ public class Query implements Serializable {
     public MongoCollection getCollection() {
         return collection;
     }
+
+    @Override
+    public String toString() {
+        return "Query{" +
+                "query='" + query + '\'' +
+                ", findOne=" + findOne +
+                '}';
+    }
 }

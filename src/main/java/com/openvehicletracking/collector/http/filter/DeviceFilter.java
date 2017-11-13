@@ -6,6 +6,8 @@ import com.openvehicletracking.collector.http.domain.UserDevice;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -16,10 +18,12 @@ import java.util.Optional;
  */
 public class DeviceFilter implements Handler<RoutingContext> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceFilter.class);
     private String deviceIdparamName;
 
     public DeviceFilter(String deviceIdparamName) {
         this.deviceIdparamName = deviceIdparamName;
+        LOGGER.debug("deviceIdparamName {}", deviceIdparamName);
     }
 
     public static DeviceFilter create(String deviceIdparamName) {
@@ -35,6 +39,8 @@ public class DeviceFilter implements Handler<RoutingContext> {
         Optional<UserDevice> userDevice = user.getDevices().stream().filter(d -> Objects.equals(d.getSerial(), deviceId)).findFirst();
 
         if (userDevice.isPresent()) {
+            UserDevice device = userDevice.get();
+            LOGGER.debug("putting user device to context {}({}-{})", device.getLabel(), device.getDevice(), device.getSerial());
             context.put("device", userDevice.get());
             context.next();
             return;

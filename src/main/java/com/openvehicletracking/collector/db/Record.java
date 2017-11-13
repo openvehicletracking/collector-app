@@ -53,4 +53,14 @@ public class Record implements Serializable {
         this.updateQuery = updateQuery;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "collection=" + collection +
+                ", record='" + record + '\'' +
+                ", replaceQuery=" + replaceQuery +
+                ", updateQuery=" + updateQuery +
+                '}';
+    }
 }
