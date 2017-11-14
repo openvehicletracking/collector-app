@@ -61,7 +61,7 @@ public class UserController {
             }
 
             User user = User.fromJson(userResult);
-            AccessToken token = AccessToken.createFor2Hours();
+            AccessToken token = AccessToken.createFor24Hours();
 
             JsonObject jsonRecord = new JsonObject()
                     .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.toJson())));
