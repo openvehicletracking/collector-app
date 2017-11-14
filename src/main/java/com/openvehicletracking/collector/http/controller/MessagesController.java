@@ -51,12 +51,14 @@ public class MessagesController {
 
         FindOptions findOptions = new FindOptions();
         findOptions.setSort(new JsonObject().put("datetime", FindOrder.DESC.getValue()));
+        findOptions.setLimit(1);
 
-        Query deviceMessageQuery = new Query(MongoCollection.MESSAGES, query, findOptions).setFindOne(true);
+        Query deviceMessageQuery = new Query(MongoCollection.MESSAGES, query, findOptions);
 
-        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, deviceMessageQuery, messageResult -> {
-            if (messageResult.result().body() != null) {
-                LocationMessage locationMessage = LocationMessage.fromJson(messageResult.result().body().toString(), deviceImpl.getLocationType());
+        context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, deviceMessageQuery, messageResult -> {
+            if (messageResult.result().body() != null && messageResult.result().body().size() > 0) {
+                JsonObject message = messageResult.result().body().getJsonObject(0);
+                LocationMessage locationMessage = LocationMessage.fromJson(message.toString(), deviceImpl.getLocationType());
                 try {
                     DeviceState stateFromDbMessage = deviceImpl.createStateFromMessage(locationMessage);
                     HttpHelper.getOK(context.response(), gson.toJson(stateFromDbMessage)).end();

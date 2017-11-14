@@ -23,7 +23,6 @@ public class DeviceFilter implements Handler<RoutingContext> {
 
     public DeviceFilter(String deviceIdparamName) {
         this.deviceIdparamName = deviceIdparamName;
-        LOGGER.debug("deviceIdparamName {}", deviceIdparamName);
     }
 
     public static DeviceFilter create(String deviceIdparamName) {
@@ -40,8 +39,7 @@ public class DeviceFilter implements Handler<RoutingContext> {
 
         if (userDevice.isPresent()) {
             UserDevice device = userDevice.get();
-            LOGGER.debug("putting user device to context {}({}-{})", device.getLabel(), device.getDevice(), device.getSerial());
-            context.put("device", userDevice.get());
+            context.put("device", device);
             context.next();
             return;
         }

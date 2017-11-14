@@ -75,6 +75,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void handler(Message<Buffer> buffer) {
         String rawMessage = buffer.body().toString();
+        LOGGER.debug("new message handled {}", rawMessage);
         DeviceAndHandlerFinder deviceAndHandlerFinder = new DeviceAndHandlerFinder(rawMessage);
 
         if (deviceAndHandlerFinder.getHandler() == null) {
@@ -82,7 +83,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             return;
         }
 
-        LOGGER.debug("Handler {} found for message {}", deviceAndHandlerFinder.getHandler().getClass().getCanonicalName(), rawMessage);
+        LOGGER.debug("handler found {}", deviceAndHandlerFinder.getHandler().getClass().getCanonicalName());
         com.openvehicletracking.core.message.Message message = deviceAndHandlerFinder.getHandler().handle(rawMessage);
 
 
@@ -120,7 +121,6 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void createStateFromMessage(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         try {
-            LOGGER.debug("State genrating for message", message);
             DeviceState state = deviceAndHandlerFinder.getDevice().createStateFromMessage(message);
             if (state != null) {
                 LOGGER.debug("State generated {}, {}", message, state);
@@ -148,7 +148,6 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void replyIfRequired(com.openvehicletracking.core.message.Message message, Message<Buffer> buffer, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         if (!message.isReplyRequired()) {
-            LOGGER.debug("reply is not required");
             return;
         }
 
@@ -160,9 +159,10 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             if (result.failed()) { return; }
 
             if (result.result().body() == null || result.result().body().size() == 0) {
-                LOGGER.debug("empty result set returned from commands");
                 return;
             }
+
+            LOGGER.debug("preparing to write commands {}", result.result().body());
 
             List<StringCommandMessage> commands = new ArrayList<>();
             result.result().body().stream().forEach(json -> commands.add(new Gson().fromJson(json.toString(), StringCommandMessage.class)));
