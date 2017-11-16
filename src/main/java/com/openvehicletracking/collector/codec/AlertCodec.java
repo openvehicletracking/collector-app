@@ -1,35 +1,36 @@
 package com.openvehicletracking.collector.codec;
 
 import com.google.gson.Gson;
-import com.openvehicletracking.core.alarm.Alarm;
+import com.openvehicletracking.core.GsonFactory;
+import com.openvehicletracking.core.alert.Alert;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 
 /**
  * Created by yo on 08/10/2017.
  */
-public class AlarmCodec implements MessageCodec<Alarm, Alarm> {
+public class AlertCodec implements MessageCodec<Alert, Alert> {
 
-    private final Gson gson = new Gson();
+    private final Gson gson = GsonFactory.getGson();
 
     @Override
-    public void encodeToWire(Buffer buffer, Alarm alarm) {
+    public void encodeToWire(Buffer buffer, Alert alarm) {
         String rec = gson.toJson(alarm);
         buffer.appendInt(rec.getBytes().length);
         buffer.appendString(rec);
     }
 
     @Override
-    public Alarm decodeFromWire(int pos, Buffer buffer) {
+    public Alert decodeFromWire(int pos, Buffer buffer) {
         int length = buffer.getInt(pos);
         int begin = pos + 4;
         int end = begin + length;
         String toRecord = buffer.getString(begin, end);
-        return gson.fromJson(toRecord, Alarm.class);
+        return gson.fromJson(toRecord, Alert.class);
     }
 
     @Override
-    public Alarm transform(Alarm alarm) {
+    public Alert transform(Alert alarm) {
         return alarm;
     }
 

@@ -45,8 +45,10 @@ public class UserController {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException ignored) {}
 
 
-        JsonObject queryJson = new JsonObject().put("email", username).put("password", password);
-        Query query = new Query(MongoCollection.USERS, queryJson).setFindOne(true);
+        Query query = new Query(MongoCollection.USERS)
+                .addCondition("email", username)
+                .addCondition("password", password)
+                .setFindOne(true);
 
         context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
             if (result.failed()) {
@@ -67,7 +69,7 @@ public class UserController {
                     .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.toJson())));
 
             Record record = new Record(MongoCollection.USERS, jsonRecord)
-                .setUpdateQuery(new Query(MongoCollection.USERS, new JsonObject().put("_id", user.getId())));
+                .setCondition(new Query(MongoCollection.USERS).addCondition("_id", user.getId()));
 
             context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.UPDATE, record, res -> {
                 if (res.failed()) {

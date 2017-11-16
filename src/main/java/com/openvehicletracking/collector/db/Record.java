@@ -2,6 +2,7 @@ package com.openvehicletracking.collector.db;
 
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.UpdateOptions;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -13,19 +14,14 @@ import java.util.Objects;
 public class Record implements Serializable {
 
     private final MongoCollection collection;
+    private final UpdateOptions updateOptions = new UpdateOptions();
     private final String record;
-    private Query replaceQuery;
-    private Query updateQuery;
+    private Query condition;
 
     public Record(MongoCollection collection, JsonObject record) {
         Objects.requireNonNull(record, "recorc cannot be null");
         this.collection = collection;
         this.record = record.toString();
-    }
-
-    public Record(MongoCollection collection, JsonObject record, Query replaceQuery) {
-        this(collection, record);
-        this.replaceQuery = replaceQuery;
     }
 
     public MongoCollection getCollection() {
@@ -36,31 +32,26 @@ public class Record implements Serializable {
         return new JsonObject(record);
     }
 
-    public Query getReplaceQuery() {
-        return replaceQuery;
+    public Query getCondition() {
+        return condition;
     }
 
-    public Record setReplaceQuery(Query replaceQuery) {
-        this.replaceQuery = replaceQuery;
+    public UpdateOptions getUpdateOptions() {
+        return updateOptions;
+    }
+
+    public Record setCondition(Query updateQuery) {
+        this.condition = updateQuery;
         return this;
     }
 
-    public Query getUpdateQuery() {
-        return updateQuery;
-    }
-
-    public Record setUpdateQuery(Query updateQuery) {
-        this.updateQuery = updateQuery;
+    public Record isMulti(boolean multi) {
+        updateOptions.setMulti(multi);
         return this;
     }
 
-    @Override
-    public String toString() {
-        return "Record{" +
-                "collection=" + collection +
-                ", record='" + record + '\'' +
-                ", replaceQuery=" + replaceQuery +
-                ", updateQuery=" + updateQuery +
-                '}';
+    public Record isUpsert(boolean upsert) {
+        updateOptions.setUpsert(upsert);
+        return this;
     }
 }

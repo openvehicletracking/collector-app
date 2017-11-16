@@ -2,6 +2,7 @@ package com.openvehicletracking.collector.codec;
 
 import com.google.gson.Gson;
 import com.openvehicletracking.collector.db.UpdateResult;
+import com.openvehicletracking.core.GsonFactory;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 
@@ -10,7 +11,7 @@ import io.vertx.core.eventbus.MessageCodec;
  */
 public class UpdateResultCodec implements MessageCodec<UpdateResult, UpdateResult> {
 
-    private final Gson gson = new Gson();
+    private final Gson gson = GsonFactory.getGson();
 
     @Override
     public void encodeToWire(Buffer buffer, UpdateResult updateResult) {
