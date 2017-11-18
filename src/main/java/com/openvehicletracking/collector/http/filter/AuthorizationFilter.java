@@ -37,9 +37,9 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
     }
 
     @Override
-    public void handle(RoutingContext context) {
-        HttpServerRequest request = context.request();
-        HttpServerResponse response = context.response();
+    public void handle(final RoutingContext context) {
+        final HttpServerRequest request = context.request();
+        final HttpServerResponse response = context.response();
 
         if (preAuthPaths.contains(request.path())) {
             LOGGER.debug("Path {} is pre authorised", request.path());
@@ -75,7 +75,6 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
             AccessToken userAccessToken = user.getAccessTokens().stream().filter(token -> Objects.equals(token.getToken(), accessToken)).findFirst().get();
             Date expireDate = new Date(userAccessToken.getExpireDate());
             if (expireDate.before(new Date())) {
-                LOGGER.error("expired access token for user {}", user.getEmail());
                 HttpHelper.getUnauthorized(response).end();
                 return;
             }

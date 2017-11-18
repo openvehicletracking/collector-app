@@ -24,10 +24,10 @@ public class AccessToken implements JsonSerializeable {
     }
 
 
-    public static AccessToken createFor2Hours() {
+    public static AccessToken createFor24Hours() {
         long time = new Date().getTime();
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR, 2);
+        calendar.add(Calendar.HOUR, 24);
         return new AccessToken(UUID.randomUUID().toString(), calendar.getTime().getTime(), time);
     }
 
