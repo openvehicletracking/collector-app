@@ -1,38 +1,61 @@
 package com.openvehicletracking.collector.db;
 
+import com.openvehicletracking.core.GsonFactory;
+import com.openvehicletracking.core.JsonDeserializeable;
+import com.openvehicletracking.core.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Created by oksuz on 23/09/2017.
  *
  */
-public class Query implements Serializable {
+public class Query implements JsonSerializeable, JsonDeserializeable<Query> {
 
     private FindOptions findOptions = new FindOptions();
-    private String query;
-    private FindOrder findOrder = FindOrder.ASC;
+    private String query = "{}";
     private MongoCollection collection;
     private boolean findOne = false;
 
+
     public Query(MongoCollection collection, JsonObject query) {
-        Objects.requireNonNull(collection, "collection cannot be null");
+        this(collection);
         Objects.requireNonNull(query, "query cannot be null");
-        this.collection = collection;
         this.query = query.toString();
     }
 
-    public Query(MongoCollection collection, JsonObject query, FindOptions findOptions) {
-        this(collection, query);
-        this.findOptions = findOptions;
+    public Query(MongoCollection collection) {
+        Objects.requireNonNull(collection, "collection cannot be null");
+        this.collection = collection;
     }
 
-    public Query(MongoCollection collection, JsonObject query, FindOptions findOptions, FindOrder findOrder) {
-        this(collection, query, findOptions);
-        this.findOrder = findOrder;
+    public Query setLimit(int limit) {
+        findOptions.setLimit(limit);
+        return this;
+    }
+
+    public Query addSort(String field, FindOrder order) {
+        JsonObject sort = findOptions.getSort();
+        if (null == sort) {
+            sort = new JsonObject();
+        }
+
+        sort.put(field, order.getValue());
+        return this;
+    }
+
+    public Query addCondition(String field, Object value) {
+        String newQuery;
+        try {
+            newQuery = new JsonObject(query).put(field, value).toString();
+        } catch (IllegalStateException e) {
+            newQuery = new JsonObject(query).put(field, value.toString()).toString();
+        }
+
+        query = newQuery;
+        return this;
     }
 
     public Query setFindOne(boolean findOne) {
@@ -52,12 +75,18 @@ public class Query implements Serializable {
         return new JsonObject(query);
     }
 
-    public FindOrder getFindOrder() {
-        return findOrder;
-    }
-
     public MongoCollection getCollection() {
         return collection;
+    }
+
+    @Override
+    public Query fromJsonString(String json) {
+        return GsonFactory.getGson().fromJson(json, this.getClass());
+    }
+
+    @Override
+    public String asJsonString() {
+        return GsonFactory.getGson().toJson(this);
     }
 
     @Override

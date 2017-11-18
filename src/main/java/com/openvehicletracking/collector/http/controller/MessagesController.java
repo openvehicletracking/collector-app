@@ -1,6 +1,5 @@
 package com.openvehicletracking.collector.http.controller;
 
-import com.google.gson.Gson;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.cache.DeviceStateCache;
 import com.openvehicletracking.collector.db.FindOrder;
@@ -17,7 +16,6 @@ import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
 import com.openvehicletracking.core.message.LocationMessage;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,27 +31,22 @@ public class MessagesController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagesController.class);
 
     public void state(RoutingContext context) {
-        final Gson gson = new Gson();
         UserDevice device = context.get("device");
         DeviceState state = DeviceStateCache.getInstance().get(device.getSerial());
 
         if (state != null) {
-            HttpHelper.getOK(context.response(), gson.toJson(state)).end();
+            HttpHelper.getOK(context.response(), state.asJsonString()).end();
             return;
         }
 
         Device deviceImpl = DeviceRegistry.getInstance().findDevice(device.getDevice());
 
-        JsonObject query = new JsonObject();
-        query.put("deviceId", device.getSerial())
-                .put("device", device.getDevice())
-                .put("status", GpsStatus.VALID);
-
-        FindOptions findOptions = new FindOptions();
-        findOptions.setSort(new JsonObject().put("datetime", FindOrder.DESC.getValue()));
-        findOptions.setLimit(1);
-
-        Query deviceMessageQuery = new Query(MongoCollection.MESSAGES, query, findOptions);
+        Query deviceMessageQuery = new Query(MongoCollection.MESSAGES)
+                .addCondition("deviceId", device.getSerial())
+                .addCondition("device", device.getDevice())
+                .addCondition("status", GpsStatus.VALID)
+                .addSort("datetime", FindOrder.DESC)
+                .setLimit(1);
 
         context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, deviceMessageQuery, messageResult -> {
             if (messageResult.result().body() != null && messageResult.result().body().size() > 0) {
@@ -61,8 +54,8 @@ public class MessagesController {
                 LocationMessage locationMessage = LocationMessage.fromJson(message.toString(), deviceImpl.getLocationType());
                 try {
                     DeviceState stateFromDbMessage = deviceImpl.createStateFromMessage(locationMessage);
-                    HttpHelper.getOK(context.response(), gson.toJson(stateFromDbMessage)).end();
                     DeviceStateCache.getInstance().put(stateFromDbMessage);
+                    HttpHelper.getOK(context.response(), stateFromDbMessage.asJsonString()).end();
                 } catch (UnsupportedMessageTypeException ignored) {
                     HttpHelper.getInternalServerError(context.response(), "device state not found");
                 }
@@ -82,15 +75,11 @@ public class MessagesController {
             return;
         }
 
-        FindOptions findOptions = new FindOptions();
-        findOptions.setLimit(request.getSize());
-        findOptions.setSort(new JsonObject().put("datetime", FindOrder.DESC.getValue()));
-
-        JsonObject queryJson = new JsonObject();
-        queryJson.put("deviceId", request.getDeviceId());
+        Query query = new Query(MongoCollection.MESSAGES);
+        query.addCondition("deviceId", request.getDeviceId());
 
         if (request.getGpsStatus() != null) {
-            queryJson.put("status", request.getGpsStatus());
+            query.addCondition("status", request.getGpsStatus());
         }
 
         try {
@@ -98,14 +87,15 @@ public class MessagesController {
                 JsonObject datetimeCond = new JsonObject()
                         .put("$gte", request.getFromDate().getTime())
                         .put("$lte", request.getToDate().getTime());
-                queryJson.put("datetime", datetimeCond);
+
+                query.addCondition("datetime", datetimeCond);
             }
         } catch (ParseException e) {
             HttpHelper.getBadRequest(context.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT).end();
             return;
         }
 
-        Query query = new Query(MongoCollection.MESSAGES, queryJson, findOptions);
+        query.setLimit(request.getSize()).addSort("datetime", FindOrder.DESC);
 
         context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
             JsonArray messagesResult = result.result().body();

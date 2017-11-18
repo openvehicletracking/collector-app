@@ -1,6 +1,6 @@
 package com.openvehicletracking.collector;
 
-import com.openvehicletracking.collector.codec.AlarmCodec;
+import com.openvehicletracking.collector.codec.AlertCodec;
 import com.openvehicletracking.collector.codec.QueryCodec;
 import com.openvehicletracking.collector.codec.RecordCodec;
 import com.openvehicletracking.collector.codec.UpdateResultCodec;
@@ -8,7 +8,7 @@ import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.db.UpdateResult;
 import com.openvehicletracking.core.DeviceRegistry;
-import com.openvehicletracking.core.alarm.Alarm;
+import com.openvehicletracking.core.alert.Alert;
 import com.openvehicletracking.device.xtakip.XTakip;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
@@ -71,7 +71,7 @@ public class App {
         new VerticleDeployer(vertxOptions, verticleDeployer -> {
             verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
             verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
-            verticleDeployer.registerEventBusCodec(Alarm.class, new AlarmCodec());
+            verticleDeployer.registerEventBusCodec(Alert.class, new AlertCodec());
             verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
 
             JsonArray verticles = jsonConf.getJsonArray("verticles");

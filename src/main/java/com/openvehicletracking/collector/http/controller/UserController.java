@@ -28,7 +28,7 @@ public class UserController {
     public void user(RoutingContext context) {
         User user = context.get("user");
         user.setPassword("");
-        HttpHelper.getOK(context.response(), user.toJson()).end();
+        HttpHelper.getOK(context.response(), user.asJsonString()).end();
     }
 
     public void checkpoint(RoutingContext context) {
@@ -45,8 +45,10 @@ public class UserController {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException ignored) {}
 
 
-        JsonObject queryJson = new JsonObject().put("email", username).put("password", password);
-        Query query = new Query(MongoCollection.USERS, queryJson).setFindOne(true);
+        Query query = new Query(MongoCollection.USERS)
+                .addCondition("email", username)
+                .addCondition("password", password)
+                .setFindOne(true);
 
         context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
             if (result.failed()) {
@@ -60,14 +62,14 @@ public class UserController {
                 return;
             }
 
-            User user = User.fromJson(userResult);
+            User user = User.fromMongoRecord(userResult);
             AccessToken token = AccessToken.createFor24Hours();
 
             JsonObject jsonRecord = new JsonObject()
-                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.toJson())));
+                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.asJsonString())));
 
             Record record = new Record(MongoCollection.USERS, jsonRecord)
-                .setUpdateQuery(new Query(MongoCollection.USERS, new JsonObject().put("_id", user.getId())));
+                .setCondition(new Query(MongoCollection.USERS).addCondition("_id", user.getId()));
 
             context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.UPDATE, record, res -> {
                 if (res.failed()) {
@@ -77,7 +79,7 @@ public class UserController {
 
                 UpdateResult updateResult = res.result().body();
                  if (updateResult.getDocModified() > 0) {
-                    HttpHelper.getOK(context.response(), token.toJson()).end();
+                    HttpHelper.getOK(context.response(), token.asJsonString()).end();
                 } else {
                     HttpHelper.getInternalServerError(context.response(), "unkown error").end();
                 }

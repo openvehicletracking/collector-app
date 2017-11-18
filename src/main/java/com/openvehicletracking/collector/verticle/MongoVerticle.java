@@ -47,18 +47,13 @@ public class MongoVerticle extends AbstractVerticle {
     private void updateHandler(Message<Record> recordMessage) {
         Record record = recordMessage.body();
 
-        Query update = record.getUpdateQuery();
-        Query replace = record.getReplaceQuery();
-        JsonObject query;
+        JsonObject condition = record.getCondition().getQuery();
+        replaceIdToMongoId(condition);
 
-        if (update != null) {
-            query = update.getQuery();
-            replaceIdToMongoId(query);
-            client.updateCollection(record.getCollection().getName(), query, record.getRecord(), getUpdateResultHandler(recordMessage));
-        } else if (replace != null) {
-            query = replace.getQuery();
-            replaceIdToMongoId(query);
-            client.replaceDocuments(record.getCollection().getName(), query, record.getRecord(), getUpdateResultHandler(recordMessage));
+        if (record.getUpdateOptions().isUpsert()) {
+            client.replaceDocumentsWithOptions(record.getCollection().getName(), condition, record.getRecord(), record.getUpdateOptions(), getUpdateResultHandler(recordMessage));
+        } else {
+            client.updateCollectionWithOptions(record.getCollection().getName(), condition, record.getRecord(), record.getUpdateOptions(), getUpdateResultHandler(recordMessage));
         }
     }
 

@@ -1,10 +1,9 @@
 package com.openvehicletracking.collector.verticle;
 
-import com.google.gson.Gson;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.core.alarm.Alarm;
+import com.openvehicletracking.core.alert.Alert;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -24,15 +23,13 @@ public class AlarmVerticle extends AbstractVerticle {
     public void start() throws Exception {
         LOGGER.info("Starting verticle AlarmVerticle");
 
-        MessageConsumer<Alarm> alarmMessageConsumer = vertx.eventBus().consumer(AppConstants.Events.ALARM);
+        MessageConsumer<Alert> alarmMessageConsumer = vertx.eventBus().consumer(AppConstants.Events.ALARM);
         alarmMessageConsumer.handler(this::alarmHandler);
     }
 
-    private void alarmHandler(Message<Alarm> alarmMessage) {
-        JsonObject alert = new JsonObject(new Gson().toJson(alarmMessage.body()));
-        Record record = new Record(MongoCollection.ALARMS, alert);
+    private void alarmHandler(Message<Alert> alarmMessage) {
+        Record record = new Record(MongoCollection.ALARMS, new JsonObject(alarmMessage.body().asJsonString()));
         vertx.eventBus().send(AppConstants.Events.PERSIST, record);
-
-        LOGGER.debug("new alert fired {}", alert.encodePrettily());
+        LOGGER.debug("new alert fired {}", alarmMessage.body().asJsonString());
     }
 }

@@ -54,7 +54,9 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         }
 
         String accessToken = request.getHeader(AppConstants.HEADER_ACCESS_TOKEN);
-        Query query = new Query(MongoCollection.USERS, new JsonObject().put("accessTokens.token", accessToken)).setFindOne(true);
+        Query query = new Query(MongoCollection.USERS)
+                .addCondition("accessTokens.token", accessToken)
+                .setFindOne(true);
 
         context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
             JsonObject userResult = result.result().body();
@@ -69,7 +71,7 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
                 return;
             }
 
-            User user = User.fromJson(userResult);
+            User user = User.fromMongoRecord(userResult);
             AccessToken userAccessToken = user.getAccessTokens().stream().filter(token -> Objects.equals(token.getToken(), accessToken)).findFirst().get();
             Date expireDate = new Date(userAccessToken.getExpireDate());
             if (expireDate.before(new Date())) {

@@ -1,6 +1,7 @@
 package com.openvehicletracking.collector.http.domain;
 
-import com.google.gson.Gson;
+import com.openvehicletracking.core.GsonFactory;
+import com.openvehicletracking.core.JsonSerializeable;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.UUID;
  * Created by oksuz on 07/10/2017.
  *
  */
-public class AccessToken {
+public class AccessToken implements JsonSerializeable {
 
     private String token;
     private long expireDate;
@@ -22,9 +23,6 @@ public class AccessToken {
         this.createdAt = createdAt;
     }
 
-    public String toJson() {
-        return new Gson().toJson(this);
-    }
 
     public static AccessToken createFor24Hours() {
         long time = new Date().getTime();
@@ -77,5 +75,10 @@ public class AccessToken {
         int result = token.hashCode();
         result = 31 * result + (int) (expireDate ^ (expireDate >>> 32));
         return result;
+    }
+
+    @Override
+    public String asJsonString() {
+        return GsonFactory.getGson().toJson(this);
     }
 }

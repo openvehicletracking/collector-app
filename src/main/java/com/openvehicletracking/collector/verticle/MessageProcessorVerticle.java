@@ -1,6 +1,5 @@
 package com.openvehicletracking.collector.verticle;
 
-import com.google.gson.Gson;
 import com.openvehicletracking.collector.AppConstants;
 import com.openvehicletracking.collector.cache.DeviceStateCache;
 import com.openvehicletracking.collector.db.MongoCollection;
@@ -9,7 +8,7 @@ import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.DeviceState;
-import com.openvehicletracking.core.alarm.Alarm;
+import com.openvehicletracking.core.alert.Alert;
 import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
 import com.openvehicletracking.core.message.MessageHandler;
 import com.openvehicletracking.core.message.Reply;
@@ -133,13 +132,13 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
     private void persistIfLocationMessage(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
         if (message.getClass() == deviceAndHandlerFinder.getDevice().getLocationType()) {
-            Record record = new Record(MongoCollection.MESSAGES, new JsonObject(new Gson().toJson(message)));
+            Record record = new Record(MongoCollection.MESSAGES, new JsonObject(message.asJsonString()));
             vertx.eventBus().send(AppConstants.Events.PERSIST, record);
         }
     }
 
     private void createAlertIfRequired(com.openvehicletracking.core.message.Message message, DeviceAndHandlerFinder deviceAndHandlerFinder) {
-        Alarm alarm = deviceAndHandlerFinder.getDevice().generateAlarmFromMessage(message);
+        Alert alarm = deviceAndHandlerFinder.getDevice().generateAlertFromMessage(message);
         if (alarm != null) {
             LOGGER.debug("alert generated from message {}", alarm);
             vertx.eventBus().send(AppConstants.Events.ALARM, alarm);
@@ -151,10 +150,10 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             return;
         }
 
-        JsonObject queryJson = new JsonObject().put("deviceId", message.getDeviceId())
-                .put("isRead", false);
+        Query query = new Query(MongoCollection.COMMANDS)
+                .addCondition("deviceId", message.getDeviceId())
+                .addCondition("isRead", false);
 
-        Query query = new Query(MongoCollection.COMMANDS, queryJson);
         vertx.eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
             if (result.failed()) { return; }
 
@@ -165,7 +164,10 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             LOGGER.debug("preparing to write commands {}", result.result().body());
 
             List<StringCommandMessage> commands = new ArrayList<>();
-            result.result().body().stream().forEach(json -> commands.add(new Gson().fromJson(json.toString(), StringCommandMessage.class)));
+            result.result().body().stream().forEach(json -> {
+                StringCommandMessage stringCommandMessage = (StringCommandMessage) new StringCommandMessage().fromJsonString(json.toString());
+                commands.add(stringCommandMessage);
+            });
 
             Reply<String> replies = null;
             try {
@@ -185,17 +187,19 @@ public class MessageProcessorVerticle extends AbstractVerticle {
             return;
         }
 
-        JsonObject updateQueryJson = new JsonObject().put("deviceId", message.getDeviceId())
-                .put("requestId", message.getRequestId().get())
-                .put("isRead", false);
+        Query updateQuery = new Query(MongoCollection.COMMANDS)
+                .addCondition("deviceId", message.getDeviceId())
+                .addCondition("requestId", message.getRequestId().get())
+                .addCondition("isRead", false);
 
-        JsonObject recordJson = new JsonObject();
-        recordJson.put("$set", new JsonObject(new Gson().toJson(message)).put("isRead", true));
+        JsonObject recordJson = new JsonObject()
+        .put("$set", new JsonObject(message.asJsonString()).put("isRead", true));
 
-        Record record = new Record(MongoCollection.COMMANDS, recordJson, null)
-                .setUpdateQuery(new Query(MongoCollection.COMMANDS, updateQueryJson));
+        Record record = new Record(MongoCollection.COMMANDS, recordJson)
+                .setCondition(updateQuery);
 
         vertx.eventBus().send(AppConstants.Events.UPDATE, record);
+
         LOGGER.debug("updating command {}", record);
     }
 }
