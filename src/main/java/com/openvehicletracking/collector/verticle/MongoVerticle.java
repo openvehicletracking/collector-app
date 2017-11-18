@@ -51,7 +51,7 @@ public class MongoVerticle extends AbstractVerticle {
         replaceIdToMongoId(condition);
 
         if (record.getUpdateOptions().isUpsert()) {
-            client.updateCollectionWithOptions(record.getCollection().getName(), condition, record.getRecord(), record.getUpdateOptions(), getUpdateResultHandler(recordMessage));
+            client.replaceDocumentsWithOptions(record.getCollection().getName(), condition, record.getRecord(), record.getUpdateOptions(), getUpdateResultHandler(recordMessage));
         } else {
             client.updateCollectionWithOptions(record.getCollection().getName(), condition, record.getRecord(), record.getUpdateOptions(), getUpdateResultHandler(recordMessage));
         }

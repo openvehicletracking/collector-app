@@ -28,7 +28,7 @@ public class UserController {
     public void user(RoutingContext context) {
         User user = context.get("user");
         user.setPassword("");
-        HttpHelper.getOK(context.response(), user.toJson()).end();
+        HttpHelper.getOK(context.response(), user.asJsonString()).end();
     }
 
     public void checkpoint(RoutingContext context) {
@@ -62,11 +62,11 @@ public class UserController {
                 return;
             }
 
-            User user = User.fromJson(userResult);
+            User user = User.fromMongoRecord(userResult);
             AccessToken token = AccessToken.createFor2Hours();
 
             JsonObject jsonRecord = new JsonObject()
-                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.toJson())));
+                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.asJsonString())));
 
             Record record = new Record(MongoCollection.USERS, jsonRecord)
                 .setCondition(new Query(MongoCollection.USERS).addCondition("_id", user.getId()));
@@ -79,7 +79,7 @@ public class UserController {
 
                 UpdateResult updateResult = res.result().body();
                  if (updateResult.getDocModified() > 0) {
-                    HttpHelper.getOK(context.response(), token.toJson()).end();
+                    HttpHelper.getOK(context.response(), token.asJsonString()).end();
                 } else {
                     HttpHelper.getInternalServerError(context.response(), "unkown error").end();
                 }

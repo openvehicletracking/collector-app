@@ -71,7 +71,7 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
                 return;
             }
 
-            User user = User.fromJson(userResult);
+            User user = User.fromMongoRecord(userResult);
             AccessToken userAccessToken = user.getAccessTokens().stream().filter(token -> Objects.equals(token.getToken(), accessToken)).findFirst().get();
             Date expireDate = new Date(userAccessToken.getExpireDate());
             if (expireDate.before(new Date())) {
