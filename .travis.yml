@@ -8,8 +8,6 @@ sudo: false
 services:
   - docker
 
-script: ./gradlew build
-
 after_success:
   - docker build -t openvehicletracking/collector .;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
