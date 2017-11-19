@@ -58,4 +58,8 @@ shadowJar {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4'
+}
+
 build.finalizedBy shadowJar
