@@ -47,6 +47,10 @@ public class HttpHelper {
                 .write(out);
     }
 
+    public static HttpServerResponse getOK(HttpServerResponse response, JsonObject out) {
+        return getOK(response, out.toString());
+    }
+
     public static HttpServerResponse getOKNoContent(HttpServerResponse response) {
         return response.setStatusCode(HttpResponseStatus.NO_CONTENT.code())
                 .setStatusMessage(HttpResponseStatus.NO_CONTENT.reasonPhrase());
@@ -58,6 +62,15 @@ public class HttpHelper {
 
         return response.setStatusCode(HttpResponseStatus.NOT_FOUND.code())
                 .setStatusMessage(HttpResponseStatus.NOT_FOUND.reasonPhrase())
+                .putHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(out.length()))
+                .write(out);
+    }
+
+    public static HttpServerResponse getGone(HttpServerResponse response, String error) {
+        String out = new JsonObject().put("gone", error).toString();
+
+        return response.setStatusCode(HttpResponseStatus.GONE.code())
+                .setStatusMessage(HttpResponseStatus.GONE.reasonPhrase())
                 .putHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(out.length()))
                 .write(out);
     }

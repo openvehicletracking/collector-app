@@ -2,6 +2,7 @@ package com.openvehicletracking.collector.verticle;
 
 import com.openvehicletracking.collector.http.Controller;
 import com.openvehicletracking.collector.http.controller.MessagesController;
+import com.openvehicletracking.collector.http.controller.PublicLocationController;
 import com.openvehicletracking.collector.http.controller.UserController;
 import com.openvehicletracking.collector.http.filter.AuthorizationFilter;
 import com.openvehicletracking.collector.http.filter.DeviceFilter;
@@ -36,6 +37,7 @@ public class HttpVerticle extends AbstractVerticle {
         HashSet<String> preAuthorisedPaths = new HashSet<>();
 
         preAuthorisedPaths.add(virtualPath + "/access-token");
+        preAuthorisedPaths.add(virtualPath + "/f/.*");
 
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
@@ -57,9 +59,14 @@ public class HttpVerticle extends AbstractVerticle {
         router.route(HttpMethod.GET, virtualPath + "/user/checkpoint").handler(Controller.of(UserController.class)::checkpoint);
         router.route(HttpMethod.POST, virtualPath + "/access-token").handler(Controller.of(UserController.class)::login);
 
+
         router.route(virtualPath + "/device/:deviceId/*").handler(DeviceFilter.create("deviceId"));
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/state").handler(Controller.of(MessagesController.class)::state);
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages").handler(Controller.of(MessagesController.class)::lastMessages);
+        router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/public-hash").handler(Controller.of(PublicLocationController.class)::createHash);
+
+        router.route(HttpMethod.GET, virtualPath + "/f/:hash").handler(Controller.of(PublicLocationController.class)::publicLocation);
+
 
 
         httpServer.requestHandler(router::accept).listen(httpPort);

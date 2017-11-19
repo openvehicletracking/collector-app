@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by oksuz on 09/07/2017.
@@ -41,7 +44,13 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         final HttpServerRequest request = context.request();
         final HttpServerResponse response = context.response();
 
-        if (preAuthPaths.contains(request.path())) {
+        Optional<String> requestPath = preAuthPaths.stream().filter(s -> {
+            Pattern p = Pattern.compile(s);
+            Matcher m = p.matcher(request.path());
+            return m.matches();
+        }).findAny();
+
+        if (requestPath.isPresent()) {
             LOGGER.debug("Path {} is pre authorised", request.path());
             context.next();
             return;

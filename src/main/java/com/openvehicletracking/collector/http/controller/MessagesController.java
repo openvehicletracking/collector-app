@@ -63,7 +63,6 @@ public class MessagesController {
                 HttpHelper.getNotFound(context.response(), "device state not found").end();
             }
         });
-
     }
 
     public void lastMessages(RoutingContext context) {
@@ -102,4 +101,5 @@ public class MessagesController {
             HttpHelper.getOK(context.response(), messagesResult.toString()).end();
         });
     }
+
 }
