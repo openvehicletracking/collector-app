@@ -10,6 +10,9 @@ services:
 
 script: gradle clean build
 
+before_install:
+  - gradle assemble
+
 after_success:
   - docker build -t openvehicletracking/collector .;
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
