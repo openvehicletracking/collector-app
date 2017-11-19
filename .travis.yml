@@ -8,7 +8,7 @@ sudo: false
 services:
   - docker
 
-script: gradle clean build
+script: ./gradlew build
 
 after_success:
   - docker build -t openvehicletracking/collector .;
