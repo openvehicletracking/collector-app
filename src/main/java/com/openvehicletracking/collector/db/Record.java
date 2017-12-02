@@ -2,7 +2,6 @@ package com.openvehicletracking.collector.db;
 
 
 import com.openvehicletracking.core.GsonFactory;
-import com.openvehicletracking.core.JsonDeserializeable;
 import com.openvehicletracking.core.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.UpdateOptions;
@@ -13,7 +12,7 @@ import java.util.Objects;
  * Created by oksuz on 23/09/2017.
  *
  */
-public class Record implements JsonSerializeable, JsonDeserializeable<Record> {
+public class Record implements JsonSerializeable {
 
     private final MongoCollection collection;
     private final UpdateOptions updateOptions = new UpdateOptions();
@@ -55,11 +54,6 @@ public class Record implements JsonSerializeable, JsonDeserializeable<Record> {
     public Record isUpsert(boolean upsert) {
         updateOptions.setUpsert(upsert);
         return this;
-    }
-
-    @Override
-    public Record fromJsonString(String json) {
-        return GsonFactory.getGson().fromJson(json, this.getClass());
     }
 
     @Override

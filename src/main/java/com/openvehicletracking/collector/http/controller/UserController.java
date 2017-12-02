@@ -21,10 +21,13 @@ import java.security.NoSuchAlgorithmException;
  * Created by oksuz on 08/10/2017.
  *
  */
-public class UserController {
+public class UserController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
+    public UserController(JsonObject config) {
+        super(config);
+    }
     public void user(RoutingContext context) {
         User user = context.get("user");
         user.setPassword("");

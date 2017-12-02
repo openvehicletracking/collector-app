@@ -8,6 +8,7 @@ import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.DeviceState;
+import com.openvehicletracking.core.GsonFactory;
 import com.openvehicletracking.core.alert.Alert;
 import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
 import com.openvehicletracking.core.message.MessageHandler;
@@ -165,7 +166,7 @@ public class MessageProcessorVerticle extends AbstractVerticle {
 
             List<StringCommandMessage> commands = new ArrayList<>();
             result.result().body().stream().forEach(json -> {
-                StringCommandMessage stringCommandMessage = (StringCommandMessage) new StringCommandMessage().fromJsonString(json.toString());
+                StringCommandMessage stringCommandMessage = GsonFactory.getGson().fromJson(json.toString(), StringCommandMessage.class);
                 commands.add(stringCommandMessage);
             });
 

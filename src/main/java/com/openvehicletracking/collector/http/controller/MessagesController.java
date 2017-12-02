@@ -26,9 +26,13 @@ import java.text.ParseException;
  * Created by oksuz on 08/10/2017.
  *
  */
-public class MessagesController {
+public class MessagesController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagesController.class);
+
+    public MessagesController(JsonObject config) {
+        super(config);
+    }
 
     public void state(RoutingContext context) {
         UserDevice device = context.get("device");

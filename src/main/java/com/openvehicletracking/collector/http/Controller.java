@@ -1,6 +1,10 @@
 package com.openvehicletracking.collector.http;
 
 
+import io.vertx.core.json.JsonObject;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -10,7 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Controller {
 
     private static final ConcurrentHashMap<String, Object> instances = new ConcurrentHashMap<>();
+    private static JsonObject config = new JsonObject();
 
+    public static void setConfig(JsonObject config) {
+        Controller.config = new JsonObject(config.toString());
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> T of(Class<T> tClass) {
 
         if (instances.containsKey(tClass.getCanonicalName())) {
@@ -18,10 +28,11 @@ public class Controller {
         }
 
         try {
-            T instance = tClass.newInstance();
+            Constructor constructor = tClass.getConstructor(JsonObject.class);
+            T instance = (T) constructor.newInstance(config);
             instances.putIfAbsent(tClass.getCanonicalName(), instance);
             return instance;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }

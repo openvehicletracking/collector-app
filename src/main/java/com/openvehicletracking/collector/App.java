@@ -1,12 +1,10 @@
 package com.openvehicletracking.collector;
 
-import com.openvehicletracking.collector.codec.AlertCodec;
-import com.openvehicletracking.collector.codec.QueryCodec;
-import com.openvehicletracking.collector.codec.RecordCodec;
-import com.openvehicletracking.collector.codec.UpdateResultCodec;
+import com.openvehicletracking.collector.codec.*;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.db.UpdateResult;
+import com.openvehicletracking.collector.notification.sms.SmsSendResult;
 import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.alert.Alert;
 import com.openvehicletracking.device.xtakip.XTakip;
@@ -73,6 +71,7 @@ public class App {
             verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
             verticleDeployer.registerEventBusCodec(Alert.class, new AlertCodec());
             verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
+            verticleDeployer.registerEventBusCodec(SmsSendResult.class, new SmsSendResultCodec());
 
             JsonArray verticles = jsonConf.getJsonArray("verticles");
             verticles.forEach(v -> {

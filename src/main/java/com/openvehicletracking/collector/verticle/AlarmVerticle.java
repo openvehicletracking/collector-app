@@ -22,7 +22,6 @@ public class AlarmVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         LOGGER.info("Starting verticle AlarmVerticle");
-
         MessageConsumer<Alert> alarmMessageConsumer = vertx.eventBus().consumer(AppConstants.Events.ALARM);
         alarmMessageConsumer.handler(this::alarmHandler);
     }

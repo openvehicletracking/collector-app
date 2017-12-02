@@ -7,8 +7,10 @@ import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.db.Record;
 import com.openvehicletracking.collector.helper.HttpHelper;
 import com.openvehicletracking.collector.http.domain.HashCreateRequest;
+import com.openvehicletracking.collector.http.domain.ShareLocationWithSmsRequest;
 import com.openvehicletracking.collector.http.domain.User;
 import com.openvehicletracking.collector.http.domain.UserDevice;
+import com.openvehicletracking.collector.notification.SendResult;
 import com.openvehicletracking.core.DeviceState;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -23,7 +25,11 @@ import java.util.Objects;
  * Created by oksuz on 18/11/2017.
  *
  */
-public class PublicLocationController {
+public class PublicLocationController extends AbstractController {
+
+    public PublicLocationController(JsonObject config) {
+        super(config);
+    }
 
     public void publicLocation(RoutingContext context) {
         HttpServerRequest request = context.request();
@@ -51,32 +57,18 @@ public class PublicLocationController {
             DeviceState state = DeviceStateCache.getInstance().get(publicDevice.getString("deviceId"));
             if (state == null) {
                 // @TODO Create device state from last valid message
-                HttpHelper.getInternalServerError(response, "device state not found! why?").end();
+                HttpHelper.getInternalServerError(response, "device state not found!").end();
                 return;
             }
 
-            Query deviceQuery = new Query(MongoCollection.USERS)
-                    .addCondition("devices.serial", state.getDeviceId());
+            JsonObject hashResponse = new JsonObject();
+            hashResponse.put("latitude", state.getLatitude());
+            hashResponse.put("longitude", state.getLongitude());
+            hashResponse.put("direction", state.getDirection());
+            hashResponse.put("speed", state.getSpeed());
+            hashResponse.put("label", publicDevice.getString("label"));
 
-            context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, deviceQuery, deviceQueryResult -> {
-                if (deviceQueryResult.failed()) {
-                    HttpHelper.getInternalServerError(response, "device query failed").end();
-                    return;
-                }
-
-                JsonArray userList = deviceQueryResult.result().body();
-                User user = User.fromMongoRecord(userList.getJsonObject(0));
-                UserDevice userDevice = user.getDevices().stream().filter(device -> Objects.equals(state.getDeviceId(), device.getSerial())).findAny().get();
-
-                JsonObject hashResponse = new JsonObject();
-                hashResponse.put("latitude", state.getLatitude());
-                hashResponse.put("longitude", state.getLongitude());
-                hashResponse.put("direction", state.getDirection());
-                hashResponse.put("speed", state.getSpeed());
-                hashResponse.put("label", userDevice.getLabel());
-
-                HttpHelper.getOK(response, hashResponse).end();
-            });
+            HttpHelper.getOK(response, hashResponse).end();
         });
     }
 
@@ -88,10 +80,62 @@ public class PublicLocationController {
         hashRecord.put("deviceId", hashCreateRequest.getDeviceId())
                 .put("expireDate", hashCreateRequest.getExpireDate().getTime())
                 .put("hash", hashCreateRequest.createHashForRequest())
+                .put("label", hashCreateRequest.getDeviceLabel())
                 .put("isActive", true);
 
         Record record = new Record(MongoCollection.PUBLIC_LOCATION_HASH, hashRecord);
-        context.vertx().eventBus().send(AppConstants.Events.PERSIST, record);
-        HttpHelper.getOK(response, hashRecord).end();
+        context.vertx().eventBus().<String>send(AppConstants.Events.PERSIST, record, result -> {
+            if (result.succeeded() && result.result() != null) {
+                String docId = result.result().body();
+                hashRecord.put("docId", docId);
+                HttpHelper.getOK(response, hashRecord).end();
+            } else {
+                String cause = (result.cause() != null) ? result.cause().getMessage() : "cannot create document";
+                HttpHelper.getInternalServerError(response, cause).end();
+            }
+        });
+    }
+
+    public void shareLocationWithSms(RoutingContext context) {
+        final HttpServerResponse response = context.response();
+        final ShareLocationWithSmsRequest smsRequest = new ShareLocationWithSmsRequest(context);
+
+        JsonObject smsConfig = getConfig().getJsonObject("sms");
+        String number, hash, smsBody, publicLocationUrl, label;
+        try {
+            number = smsRequest.getSmsNumber();
+            hash = smsRequest.getHash();
+        } catch (Exception e) {
+            HttpHelper.getBadRequest(response, e.getMessage()).end();
+            return;
+        }
+
+
+
+        publicLocationUrl = String.format(getConfig().getString("publicLocationUrl"), hash);
+        label = ((UserDevice) context.get("device")).getLabel();
+        smsBody = smsConfig.getString("locationShareMessage")
+                .replace("%URL%", publicLocationUrl)
+                .replace("%LABEL%", label);
+
+        JsonObject sendSmsRequest = new JsonObject().put("gsm", number).put("body", smsBody);
+
+        context.vertx().eventBus().<SendResult>send(AppConstants.Events.NEW_SMS, sendSmsRequest, sendResult -> {
+            if (sendResult.failed()) {
+                String err = sendResult.cause() != null ? sendResult.cause().getMessage() : "Internal Server Error";
+                HttpHelper.getInternalServerError(response, err).end();
+                return;
+            }
+
+            SendResult result = sendResult.result().body();
+            if (result.succeed()) {
+                HttpHelper.getOK(response, new JsonObject().put("response", result.getResult())).end();
+                return;
+            }
+
+            if (result.failed()) {
+                HttpHelper.getBadRequest(response, result.getCause().getMessage()).end();
+            }
+        });
     }
 }

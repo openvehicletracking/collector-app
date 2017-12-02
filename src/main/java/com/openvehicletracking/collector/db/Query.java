@@ -1,7 +1,6 @@
 package com.openvehicletracking.collector.db;
 
 import com.openvehicletracking.core.GsonFactory;
-import com.openvehicletracking.core.JsonDeserializeable;
 import com.openvehicletracking.core.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -12,7 +11,7 @@ import java.util.Objects;
  * Created by oksuz on 23/09/2017.
  *
  */
-public class Query implements JsonSerializeable, JsonDeserializeable<Query> {
+public class Query implements JsonSerializeable {
 
     private FindOptions findOptions = new FindOptions();
     private String query = "{}";
@@ -77,11 +76,6 @@ public class Query implements JsonSerializeable, JsonDeserializeable<Query> {
 
     public MongoCollection getCollection() {
         return collection;
-    }
-
-    @Override
-    public Query fromJsonString(String json) {
-        return GsonFactory.getGson().fromJson(json, this.getClass());
     }
 
     @Override

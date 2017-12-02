@@ -37,4 +37,9 @@ public class HashCreateRequest {
     public String createHashForRequest() {
         return UUID.randomUUID().toString().replace("-", "").substring(1,7);
     }
+
+    public String getDeviceLabel() {
+        UserDevice userDevice = context.get("device");
+        return userDevice.getLabel();
+    }
 }

@@ -79,7 +79,7 @@ public class MongoVerticle extends AbstractVerticle {
 
     private void persistHandler(Message<Record> recordMessage) {
         Record record = recordMessage.body();
-        client.save(record.getCollection().getName(), record.getRecord(), genericResultHandler());
+        client.save(record.getCollection().getName(), record.getRecord(), genericResultHandler(recordMessage));
     }
 
     private void queryHandler(Message<Query> queryMessage) {
@@ -103,8 +103,9 @@ public class MongoVerticle extends AbstractVerticle {
         }
     }
 
-    private static <T> Handler<AsyncResult<T>> genericResultHandler() {
+    private static <T> Handler<AsyncResult<T>> genericResultHandler(Message<Record> recordMessage) {
         return result -> {
+            recordMessage.reply(result.result());
             if (result.failed()) {
                 LOGGER.error("Error executing query, " + result.cause().getMessage(), result.cause());
             }

@@ -1,7 +1,6 @@
 package com.openvehicletracking.collector.db;
 
 import com.openvehicletracking.core.GsonFactory;
-import com.openvehicletracking.core.JsonDeserializeable;
 import com.openvehicletracking.core.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 
@@ -9,7 +8,7 @@ import io.vertx.core.json.JsonObject;
  * Created by oksuz on 08/10/2017.
  *
  */
-public class UpdateResult implements JsonSerializeable, JsonDeserializeable<UpdateResult> {
+public class UpdateResult implements JsonSerializeable {
 
     private long docMatched;
     private long docModified;
@@ -31,11 +30,6 @@ public class UpdateResult implements JsonSerializeable, JsonDeserializeable<Upda
 
     public JsonObject getDocUpsertedId() {
         return new JsonObject(docUpsertedId);
-    }
-
-    @Override
-    public UpdateResult fromJsonString(String json) {
-        return GsonFactory.getGson().fromJson(json, this.getClass());
     }
 
     @Override

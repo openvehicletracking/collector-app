@@ -34,10 +34,12 @@ public class HttpVerticle extends AbstractVerticle {
 
         final String virtualPath = config().getString("virtualPath", "/api");
 
-        HashSet<String> preAuthorisedPaths = new HashSet<>();
 
+        HashSet<String> preAuthorisedPaths = new HashSet<>();
         preAuthorisedPaths.add(virtualPath + "/access-token");
         preAuthorisedPaths.add(virtualPath + "/f/.*");
+
+        Controller.setConfig(config());
 
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
@@ -64,9 +66,9 @@ public class HttpVerticle extends AbstractVerticle {
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/state").handler(Controller.of(MessagesController.class)::state);
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages").handler(Controller.of(MessagesController.class)::lastMessages);
         router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/public-hash").handler(Controller.of(PublicLocationController.class)::createHash);
+        router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/share").handler(Controller.of(PublicLocationController.class)::shareLocationWithSms);
 
         router.route(HttpMethod.GET, virtualPath + "/f/:hash").handler(Controller.of(PublicLocationController.class)::publicLocation);
-
 
 
         httpServer.requestHandler(router::accept).listen(httpPort);

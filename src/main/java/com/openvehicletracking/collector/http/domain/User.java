@@ -1,7 +1,6 @@
 package com.openvehicletracking.collector.http.domain;
 
 import com.openvehicletracking.core.GsonFactory;
-import com.openvehicletracking.core.JsonDeserializeable;
 import com.openvehicletracking.core.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 
@@ -12,7 +11,7 @@ import java.util.Set;
  * Created by oksuz on 07/10/2017.
  *
  */
-public class User implements JsonSerializeable, JsonDeserializeable<User>{
+public class User implements JsonSerializeable {
 
     private String id;
     private String name;
@@ -26,21 +25,15 @@ public class User implements JsonSerializeable, JsonDeserializeable<User>{
     private List<UserDevice> devices;
     private Set<AccessToken> accessTokens;
 
-
     @Override
     public String asJsonString() {
         return GsonFactory.getGson().toJson(this);
     }
 
-    @Override
-    public User fromJsonString(String json) {
-        return GsonFactory.getGson().fromJson(json, this.getClass());
-    }
-
     public static User fromMongoRecord(JsonObject object) {
         object.put("id", object.getJsonObject("_id").getString("$oid"));
         object.remove("_id");
-        return new User().fromJsonString(object.toString());
+        return GsonFactory.getGson().fromJson(object.toString(), User.class);
     }
 
     public String getName() {
