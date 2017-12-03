@@ -66,28 +66,28 @@ public class UserController extends AbstractController {
             }
 
             User user = User.fromMongoRecord(userResult);
-            AccessToken token = AccessToken.createFor24Hours();
 
-            JsonObject jsonRecord = new JsonObject()
-                    .put("$push", new JsonObject().put("accessTokens", new JsonObject(token.asJsonString())));
-
-            Record record = new Record(MongoCollection.USERS, jsonRecord)
-                .setCondition(new Query(MongoCollection.USERS).addCondition("_id", user.getId()));
-
+            AccessToken token = AccessToken.createFor24Hours(user.getEmail());
+            Query updateCondition = new Query(MongoCollection.ACCESS_TOKENS).addCondition("email", user.getEmail());
+            Record record = new Record(MongoCollection.ACCESS_TOKENS, token.toMongoRecord())
+                    .setCondition(updateCondition)
+                    .isUpsert(true);
             context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.UPDATE, record, res -> {
                 if (res.failed()) {
                     HttpHelper.getInternalServerError(context.response(), res.cause().getMessage()).end();
                     return;
                 }
 
-                UpdateResult updateResult = res.result().body();
-                 if (updateResult.getDocModified() > 0) {
-                    HttpHelper.getOK(context.response(), token.asJsonString()).end();
-                } else {
-                    HttpHelper.getInternalServerError(context.response(), "unkown error").end();
-                }
+                HttpHelper.getOK(context.response(), token.asJsonString()).end();
             });
         });
+    }
+
+    public void logout(RoutingContext context) {
+        User user = context.get("user");
+        Query deleteAccessTokenQuery = new Query(MongoCollection.ACCESS_TOKENS).addCondition("email", user.getEmail());
+        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.DELETE, deleteAccessTokenQuery);
+        HttpHelper.getOKNoContent(context.response()).end();
     }
 
 }

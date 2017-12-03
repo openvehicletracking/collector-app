@@ -63,33 +63,45 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
         }
 
         String accessToken = request.getHeader(AppConstants.HEADER_ACCESS_TOKEN);
-        Query query = new Query(MongoCollection.USERS)
-                .addCondition("accessTokens.token", accessToken)
+        Query accessTokenQuery = new Query(MongoCollection.ACCESS_TOKENS)
+                .addCondition("token", accessToken)
                 .setFindOne(true);
 
-        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, query, result -> {
-            JsonObject userResult = result.result().body();
-            if (result.failed()) {
-                LOGGER.error("user query failed", result.cause());
-                HttpHelper.getInternalServerError(response, result.cause().getMessage()).end();
+        context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, accessTokenQuery, accessTokenResult -> {
+            JsonObject accessTokenQueryResult = accessTokenResult.result().body();
+            if (accessTokenResult.failed()) {
+                LOGGER.error("access token query failed", accessTokenResult.cause());
+                HttpHelper.getInternalServerError(response, accessTokenResult.cause().getMessage()).end();
                 return;
             }
 
-            if (userResult == null) {
+            if (accessTokenQueryResult == null) {
                 HttpHelper.getUnauthorized(response).end();
                 return;
             }
 
-            User user = User.fromMongoRecord(userResult);
-            AccessToken userAccessToken = user.getAccessTokens().stream().filter(token -> Objects.equals(token.getToken(), accessToken)).findFirst().get();
-            Date expireDate = new Date(userAccessToken.getExpireDate());
-            if (expireDate.before(new Date())) {
-                HttpHelper.getUnauthorized(response).end();
-                return;
-            }
+            Query userQuery = new Query(MongoCollection.USERS)
+                    .addCondition("email", accessTokenQueryResult.getString("email"))
+                    .setFindOne(true);
 
-            context.put("user", user);
-            context.next();
+            context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, userQuery, result -> {
+                JsonObject userResult = result.result().body();
+                if (result.failed()) {
+                    LOGGER.error("user query failed", result.cause());
+                    HttpHelper.getInternalServerError(response, result.cause().getMessage()).end();
+                    return;
+                }
+
+                if (userResult == null) {
+                    HttpHelper.getUnauthorized(response).end();
+                    return;
+                }
+
+                User user = User.fromMongoRecord(userResult);
+
+                context.put("user", user);
+                context.next();
+            });
         });
     }
 }

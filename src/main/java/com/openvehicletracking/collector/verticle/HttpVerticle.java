@@ -60,6 +60,7 @@ public class HttpVerticle extends AbstractVerticle {
         router.route(HttpMethod.GET, virtualPath + "/user").handler(Controller.of(UserController.class)::user);
         router.route(HttpMethod.GET, virtualPath + "/user/checkpoint").handler(Controller.of(UserController.class)::checkpoint);
         router.route(HttpMethod.POST, virtualPath + "/access-token").handler(Controller.of(UserController.class)::login);
+        router.route(HttpMethod.GET, virtualPath + "/user/logout").handler(Controller.of(UserController.class)::logout);
 
 
         router.route(virtualPath + "/device/:deviceId/*").handler(DeviceFilter.create("deviceId"));
