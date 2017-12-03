@@ -110,8 +110,6 @@ public class PublicLocationController extends AbstractController {
             return;
         }
 
-
-
         publicLocationUrl = String.format(getConfig().getString("publicLocationUrl"), hash);
         label = ((UserDevice) context.get("device")).getLabel();
         smsBody = smsConfig.getString("locationShareMessage")
