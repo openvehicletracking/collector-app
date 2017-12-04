@@ -45,7 +45,7 @@ dependencies {
     compile 'io.vertx:vertx-web-client:' + vertxVersion
     compile 'io.vertx:vertx-hazelcast:' + vertxVersion
     compile 'com.openvehicletracking:openvehicletracking-core:1.5.0-SNAPSHOT'
-    compile 'com.openvehicletracking.device:xtakip:1.5.1-SNAPSHOT'
+    compile 'com.openvehicletracking.device:xtakip:1.5.2-SNAPSHOT'
     compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.6.3'
 
 }
