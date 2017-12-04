@@ -2,7 +2,10 @@ package com.openvehicletracking.collector.http.domain;
 
 import com.openvehicletracking.core.GsonFactory;
 import com.openvehicletracking.core.JsonSerializeable;
+import io.vertx.core.json.JsonObject;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -13,22 +16,27 @@ import java.util.UUID;
  */
 public class AccessToken implements JsonSerializeable {
 
+    private String expireAt;
+    private String email;
     private String token;
-    private long expireDate;
-    private long createdAt;
 
-    public AccessToken(String token, long expireDate, long createdAt) {
+    public AccessToken(String expireAt, String email, String token) {
+        this.expireAt = expireAt;
+        this.email = email;
         this.token = token;
-        this.expireDate = expireDate;
-        this.createdAt = createdAt;
     }
 
 
-    public static AccessToken createFor24Hours() {
-        long time = new Date().getTime();
+    public static AccessToken createFor24Hours(String email) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR, 24);
-        return new AccessToken(UUID.randomUUID().toString(), calendar.getTime().getTime(), time);
+        return new AccessToken(calendar.getTime().toInstant().toString(), email, UUID.randomUUID().toString());
+    }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getToken() {
@@ -40,21 +48,12 @@ public class AccessToken implements JsonSerializeable {
         return this;
     }
 
-    public long getExpireDate() {
-        return expireDate;
+    public String getExpireAt() {
+        return expireAt;
     }
 
-    public AccessToken setExpireDate(long expireDate) {
-        this.expireDate = expireDate;
-        return this;
-    }
-
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    public AccessToken setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
+    public AccessToken setExpireAt(String expireAt) {
+        this.expireAt = expireAt;
         return this;
     }
 
@@ -65,20 +64,26 @@ public class AccessToken implements JsonSerializeable {
 
         AccessToken that = (AccessToken) o;
 
-        if (expireDate != that.expireDate) return false;
+        if (!email.equals(that.getEmail())) return false;
+        if (!expireAt.equals(that.getExpireAt())) return false;
         return token.equals(that.token);
 
     }
 
     @Override
     public int hashCode() {
-        int result = token.hashCode();
-        result = 31 * result + (int) (expireDate ^ (expireDate >>> 32));
-        return result;
+        return token.hashCode();
     }
 
     @Override
     public String asJsonString() {
         return GsonFactory.getGson().toJson(this);
+    }
+
+    public JsonObject toMongoRecord() {
+        return new JsonObject()
+                .put("expireAt", new JsonObject().put("$date", expireAt))
+                .put("email", email)
+                .put("token", token);
     }
 }

@@ -23,7 +23,6 @@ public class User implements JsonSerializeable {
     private double updatedAt;
     private boolean isActive;
     private List<UserDevice> devices;
-    private Set<AccessToken> accessTokens;
 
     @Override
     public String asJsonString() {
@@ -114,13 +113,5 @@ public class User implements JsonSerializeable {
 
     public void setDevices(List<UserDevice> devices) {
         this.devices = devices;
-    }
-
-    public Set<AccessToken> getAccessTokens() {
-        return accessTokens;
-    }
-
-    public void setAccessTokens(Set<AccessToken> accessTokens) {
-        this.accessTokens = accessTokens;
     }
 }

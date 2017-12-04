@@ -10,7 +10,8 @@ public enum MongoCollection {
     COMMANDS("commands"),
     DEVICE_META("device_meta"),
     ALARMS("alarms"),
-    PUBLIC_LOCATION_HASH("public_location_hash");
+    PUBLIC_LOCATION_HASH("public_location_hash"),
+    ACCESS_TOKENS("access_tokens");
 
     private final String col;
 

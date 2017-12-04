@@ -20,7 +20,7 @@ public class Record implements JsonSerializeable {
     private Query condition;
 
     public Record(MongoCollection collection, JsonObject record) {
-        Objects.requireNonNull(record, "recorc cannot be null");
+        Objects.requireNonNull(record, "record cannot be null");
         this.collection = collection;
         this.record = record.toString();
     }
