@@ -68,13 +68,13 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
                 .setFindOne(true);
 
         context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, accessTokenQuery, accessTokenResult -> {
-            JsonObject accessTokenQueryResult = accessTokenResult.result().body();
             if (accessTokenResult.failed()) {
                 LOGGER.error("access token query failed", accessTokenResult.cause());
                 HttpHelper.getInternalServerError(response, accessTokenResult.cause().getMessage()).end();
                 return;
             }
 
+            JsonObject accessTokenQueryResult = accessTokenResult.result().body();
             if (accessTokenQueryResult == null) {
                 HttpHelper.getUnauthorized(response).end();
                 return;
@@ -85,13 +85,13 @@ public class AuthorizationFilter implements Handler<RoutingContext> {
                     .setFindOne(true);
 
             context.vertx().eventBus().<JsonObject>send(AppConstants.Events.NEW_QUERY, userQuery, result -> {
-                JsonObject userResult = result.result().body();
                 if (result.failed()) {
                     LOGGER.error("user query failed", result.cause());
                     HttpHelper.getInternalServerError(response, result.cause().getMessage()).end();
                     return;
                 }
 
+                JsonObject userResult = result.result().body();
                 if (userResult == null) {
                     HttpHelper.getUnauthorized(response).end();
                     return;
