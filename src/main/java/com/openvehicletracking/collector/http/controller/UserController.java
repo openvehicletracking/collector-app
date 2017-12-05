@@ -68,11 +68,8 @@ public class UserController extends AbstractController {
             User user = User.fromMongoRecord(userResult);
 
             AccessToken token = AccessToken.createFor24Hours(user.getEmail());
-            Query updateCondition = new Query(MongoCollection.ACCESS_TOKENS).addCondition("email", user.getEmail());
-            Record record = new Record(MongoCollection.ACCESS_TOKENS, token.toMongoRecord())
-                    .setCondition(updateCondition)
-                    .isUpsert(true);
-            context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.UPDATE, record, res -> {
+            Record record = new Record(MongoCollection.ACCESS_TOKENS, token.toMongoRecord());
+            context.vertx().eventBus().<UpdateResult>send(AppConstants.Events.PERSIST, record, res -> {
                 if (res.failed()) {
                     HttpHelper.getInternalServerError(context.response(), res.cause().getMessage()).end();
                     return;
