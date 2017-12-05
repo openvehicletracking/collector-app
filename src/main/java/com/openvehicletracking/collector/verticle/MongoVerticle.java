@@ -110,7 +110,7 @@ public class MongoVerticle extends AbstractVerticle {
                 queryMessage.reply(result.result());
             });
         } else {
-            LOGGER.debug("Sending findWithOptions query to {} - {} with options ", query.getCollection().getName(), query.getQuery(), findOptions);
+            LOGGER.debug("Sending findWithOptions query to {} - {} with options {}", query.getCollection().getName(), query.getQuery(), findOptions.toJson());
             client.findWithOptions(query.getCollection().getName(), query.getQuery(), findOptions, result -> {
                 if (result.failed()) {
                     LOGGER.error("query error", result.cause());
