@@ -32,7 +32,7 @@ public class DeviceStateCache {
     }
 
     public void put(DeviceState deviceState) {
-        if (deviceState.getDeviceId() != null && !"".equals(deviceState.getDeviceId().trim())) {
+        if (deviceState != null && deviceState.getDeviceId() != null && !"".equals(deviceState.getDeviceId().trim())) {
             state.put(deviceState.getDeviceId(), deviceState);
             LOGGER.debug("State put {}, {}", deviceState.getDeviceId(), deviceState);
         }

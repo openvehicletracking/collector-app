@@ -43,6 +43,7 @@ public class MessagesController extends AbstractController {
             return;
         }
 
+        LOGGER.debug("in-memory device state not found trying to generate from last valid db message");
         Device deviceImpl = DeviceRegistry.getInstance().findDevice(device.getDevice());
 
         Query deviceMessageQuery = new Query(MongoCollection.MESSAGES)
@@ -56,8 +57,10 @@ public class MessagesController extends AbstractController {
             if (messageResult.result().body() != null && messageResult.result().body().size() > 0) {
                 JsonObject message = messageResult.result().body().getJsonObject(0);
                 LocationMessage locationMessage = LocationMessage.fromJson(message.toString(), deviceImpl.getLocationType());
+                LOGGER.debug("Last valid db message found for creating state {}", message.encodePrettily());
                 try {
                     DeviceState stateFromDbMessage = deviceImpl.createStateFromMessage(locationMessage);
+                    LOGGER.debug("Created device state {}", stateFromDbMessage);
                     DeviceStateCache.getInstance().put(stateFromDbMessage);
                     HttpHelper.getOK(context.response(), stateFromDbMessage.asJsonString()).end();
                 } catch (UnsupportedMessageTypeException ignored) {
