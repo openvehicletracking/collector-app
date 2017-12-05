@@ -63,7 +63,7 @@ public class MessagesController extends AbstractController {
                     LOGGER.debug("Created device state {}", stateFromDbMessage);
                     DeviceStateCache.getInstance().put(stateFromDbMessage);
                     HttpHelper.getOK(context.response(), stateFromDbMessage.asJsonString()).end();
-                } catch (UnsupportedMessageTypeException ignored) {
+                } catch (Exception ignored) {
                     HttpHelper.getInternalServerError(context.response(), "device state not found");
                 }
             } else {
