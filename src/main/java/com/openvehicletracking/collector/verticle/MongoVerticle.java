@@ -102,6 +102,7 @@ public class MongoVerticle extends AbstractVerticle {
         FindOptions findOptions = query.getFindOptions();
 
         if (queryMessage.body().isFindOne()) {
+            LOGGER.debug("Sending findOne query to {} - {}", query.getCollection().getName(), query.getQuery());
             client.findOne(query.getCollection().getName(), query.getQuery(), null, result -> {
                 if (result.failed()) {
                     LOGGER.error("query error", result.cause());
@@ -109,6 +110,7 @@ public class MongoVerticle extends AbstractVerticle {
                 queryMessage.reply(result.result());
             });
         } else {
+            LOGGER.debug("Sending findWithOptions query to {} - {} with options ", query.getCollection().getName(), query.getQuery(), findOptions);
             client.findWithOptions(query.getCollection().getName(), query.getQuery(), findOptions, result -> {
                 if (result.failed()) {
                     LOGGER.error("query error", result.cause());
