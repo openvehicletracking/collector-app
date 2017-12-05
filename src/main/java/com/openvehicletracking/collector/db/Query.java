@@ -38,10 +38,11 @@ public class Query implements JsonSerializeable {
     public Query addSort(String field, FindOrder order) {
         JsonObject sort = findOptions.getSort();
         if (null == sort) {
-            sort = new JsonObject();
+            findOptions.setSort(new JsonObject().put(field, order.getValue()));
+        } else {
+            sort.put(field, order.getValue());
         }
 
-        sort.put(field, order.getValue());
         return this;
     }
 
