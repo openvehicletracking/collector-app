@@ -1,11 +1,13 @@
 package com.openvehicletracking.collector.verticle;
 
 import com.openvehicletracking.collector.http.Controller;
+import com.openvehicletracking.collector.http.controller.DeviceController;
 import com.openvehicletracking.collector.http.controller.MessagesController;
 import com.openvehicletracking.collector.http.controller.PublicLocationController;
 import com.openvehicletracking.collector.http.controller.UserController;
 import com.openvehicletracking.collector.http.filter.AuthorizationFilter;
 import com.openvehicletracking.collector.http.filter.DeviceFilter;
+import com.openvehicletracking.core.DeviceState;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
@@ -63,9 +65,13 @@ public class HttpVerticle extends AbstractVerticle {
         router.route(HttpMethod.GET, virtualPath + "/user/logout").handler(Controller.of(UserController.class)::logout);
 
 
-        router.route(virtualPath + "/device/:deviceId/*").handler(DeviceFilter.create("deviceId"));
+        DeviceFilter deviceFilter = DeviceFilter.create("deviceId");
+        router.route(virtualPath + "/device/:deviceId/*").handler(deviceFilter);
+        router.route(virtualPath + "/device/:deviceId").handler(deviceFilter);
+
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/state").handler(Controller.of(MessagesController.class)::state);
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages").handler(Controller.of(MessagesController.class)::lastMessages);
+        router.route(HttpMethod.GET, virtualPath + "/device/:deviceId").handler(Controller.of(DeviceController.class)::info);
         router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/public-hash").handler(Controller.of(PublicLocationController.class)::createHash);
         router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/share").handler(Controller.of(PublicLocationController.class)::shareLocationWithSms);
 

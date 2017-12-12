@@ -7,6 +7,7 @@ import com.openvehicletracking.collector.db.MongoCollection;
 import com.openvehicletracking.collector.db.Query;
 import com.openvehicletracking.collector.helper.HttpHelper;
 import com.openvehicletracking.collector.http.domain.MessageRequest;
+import com.openvehicletracking.collector.http.domain.MessagesResponse;
 import com.openvehicletracking.collector.http.domain.UserDevice;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.DeviceRegistry;
@@ -89,11 +90,16 @@ public class MessagesController extends AbstractController {
         }
 
         try {
-            if (null != request.getFromDate() && null != request.getToDate()) {
-                JsonObject datetimeCond = new JsonObject()
-                        .put("$gte", request.getFromDate().getTime())
-                        .put("$lte", request.getToDate().getTime());
+            JsonObject datetimeCond = new JsonObject();
+            if (null != request.getFromDate()) {
+                datetimeCond.put("$gte", request.getFromDate().getTime());
+            }
 
+            if (null != request.getFromDate() && null != request.getToDate()) {
+                datetimeCond.put("$lte", request.getToDate().getTime());
+            }
+
+            if (!datetimeCond.isEmpty()) {
                 query.addCondition("datetime", datetimeCond);
             }
         } catch (ParseException e) {
@@ -103,9 +109,10 @@ public class MessagesController extends AbstractController {
 
         query.setLimit(request.getSize()).addSort("datetime", FindOrder.DESC);
 
+        final MessagesResponse messagesResponse = new MessagesResponse(context.get("device"));
         context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
-            JsonArray messagesResult = result.result().body();
-            HttpHelper.getOK(context.response(), messagesResult.toString()).end();
+            messagesResponse.setMessages(result.result().body());
+            HttpHelper.getOK(context.response(), messagesResponse.getResponse()).end();
         });
     }
 

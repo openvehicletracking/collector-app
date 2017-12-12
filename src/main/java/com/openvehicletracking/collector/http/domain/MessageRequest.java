@@ -1,6 +1,6 @@
 package com.openvehicletracking.collector.http.domain;
 
-import com.openvehicletracking.collector.helper.DateHelper;
+
 import com.openvehicletracking.core.GpsStatus;
 import io.vertx.core.http.HttpServerRequest;
 import org.slf4j.Logger;
@@ -19,8 +19,7 @@ public class MessageRequest {
 
     private HttpServerRequest request;
 
-    public static final int DEFAULT_LIMIT = 100;
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_FORMAT = "yyyyMMddHHmmss";
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageRequest.class);
 
     public static ThreadLocal<SimpleDateFormat> requestDateFormat = new ThreadLocal<SimpleDateFormat>() {
@@ -36,36 +35,42 @@ public class MessageRequest {
     }
 
     private void validateRequest() throws Exception {
-        if (getSize() == 0 && getFromDate() == null) {
-            throw new Exception("date field is mandatory");
+        if (getFromDate() == null) {
+            throw new Exception("from (date) field is mandatory with format " + DATE_FORMAT);
         }
+    }
+
+    public Date getFromDate() throws ParseException {
+        Date d = getDateField("from");
+        if (d != null) {
+            return d;
+        }
+
+        return null;
     }
 
     public int getSize() {
         try {
-            return (request.getParam("size") != null) ? Integer.parseInt(request.getParam("size")) : DEFAULT_LIMIT;
+            if (request.getParam("size") != null) {
+                return Integer.parseInt(request.getParam("size"));
+            }
         } catch (NumberFormatException ignored) {}
 
-        return DEFAULT_LIMIT;
-    }
-
-    public Date getFromDate() throws ParseException {
-        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
-        if (d != null) {
-            return DateHelper.getBeginningOfDay(d);
-        }
-
-        return null;
+        return 0;
     }
 
 
     public Date getToDate() throws ParseException {
-        Date d = (request.getParam("date") != null) ? requestDateFormat.get().parse(request.getParam("date")) : null;
+        Date d = getDateField("to");
         if (d != null) {
-            return DateHelper.getEndOfDay(d);
+            return d;
         }
 
         return null;
+    }
+
+    public Date getDateField(String name) throws ParseException {
+        return (request.getParam(name) != null) ? requestDateFormat.get().parse(request.getParam(name)) : null;
     }
 
 
