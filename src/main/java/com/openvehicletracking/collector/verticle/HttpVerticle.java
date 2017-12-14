@@ -71,6 +71,7 @@ public class HttpVerticle extends AbstractVerticle {
 
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/state").handler(Controller.of(MessagesController.class)::state);
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages").handler(Controller.of(MessagesController.class)::lastMessages);
+        router.route(HttpMethod.GET, virtualPath + "/device/:deviceId/last-messages/geojson").handler(Controller.of(MessagesController.class)::asGeoJson);
         router.route(HttpMethod.GET, virtualPath + "/device/:deviceId").handler(Controller.of(DeviceController.class)::info);
         router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/public-hash").handler(Controller.of(PublicLocationController.class)::createHash);
         router.route(HttpMethod.POST, virtualPath + "/device/:deviceId/share").handler(Controller.of(PublicLocationController.class)::shareLocationWithSms);

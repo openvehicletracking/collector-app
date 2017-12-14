@@ -14,6 +14,7 @@ import com.openvehicletracking.core.DeviceRegistry;
 import com.openvehicletracking.core.DeviceState;
 import com.openvehicletracking.core.GpsStatus;
 import com.openvehicletracking.core.exception.UnsupportedMessageTypeException;
+import com.openvehicletracking.core.geojson.GeoJsonResponse;
 import com.openvehicletracking.core.message.LocationMessage;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 
 /**
  * Created by oksuz on 08/10/2017.
@@ -74,12 +76,42 @@ public class MessagesController extends AbstractController {
     }
 
     public void lastMessages(RoutingContext context) {
+        Query query = createQueryFromMessageRequest(context);
+        if (query == null) {
+            return;
+        }
+
+        final MessagesResponse messagesResponse = new MessagesResponse(context.get("device"));
+        context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
+            messagesResponse.setMessages(result.result().body());
+            HttpHelper.getOK(context.response(), messagesResponse.getResponse()).end();
+        });
+    }
+
+    public void asGeoJson(RoutingContext context) {
+        Query query = createQueryFromMessageRequest(context);
+        if (query == null) {
+            return;
+        }
+
+        UserDevice userDevice = context.get("device");
+        Device device = DeviceRegistry.getInstance().findDevice(userDevice.getDevice());
+        context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
+            JsonArray jsonMessages = result.result().body();
+            ArrayList<LocationMessage> messages = new ArrayList<>();
+            jsonMessages.forEach(o -> messages.add(LocationMessage.fromJson(o.toString(), device.getLocationType())));
+            GeoJsonResponse response = device.responseAsGeoJson(messages);
+            HttpHelper.getOK(context.response(), response.asJsonString()).end();
+        });
+    }
+
+    private Query createQueryFromMessageRequest(RoutingContext context) {
         MessageRequest request;
         try {
             request = new MessageRequest(context.request());
         } catch (Exception e) {
             HttpHelper.getBadRequest(context.response(), e.getMessage()).end();
-            return;
+            return null;
         }
 
         Query query = new Query(MongoCollection.MESSAGES);
@@ -104,16 +136,10 @@ public class MessagesController extends AbstractController {
             }
         } catch (ParseException e) {
             HttpHelper.getBadRequest(context.response(), "invalid date format. date format must be " + MessageRequest.DATE_FORMAT).end();
-            return;
+            return null;
         }
 
         query.setLimit(request.getSize()).addSort("datetime", FindOrder.DESC);
-
-        final MessagesResponse messagesResponse = new MessagesResponse(context.get("device"));
-        context.vertx().eventBus().<JsonArray>send(AppConstants.Events.NEW_QUERY, query, result -> {
-            messagesResponse.setMessages(result.result().body());
-            HttpHelper.getOK(context.response(), messagesResponse.getResponse()).end();
-        });
+        return query;
     }
-
 }
