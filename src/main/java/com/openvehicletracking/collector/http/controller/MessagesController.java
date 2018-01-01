@@ -139,7 +139,7 @@ public class MessagesController extends AbstractController {
             return null;
         }
 
-        query.setLimit(request.getSize()).addSort("datetime", FindOrder.DESC);
+        query.setLimit(request.getSize()).addSort("datetime", FindOrder.ASC);
         return query;
     }
 }
