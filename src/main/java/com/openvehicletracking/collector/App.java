@@ -1,13 +1,5 @@
 package com.openvehicletracking.collector;
 
-import com.openvehicletracking.collector.codec.*;
-import com.openvehicletracking.collector.db.Query;
-import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.collector.db.UpdateResult;
-import com.openvehicletracking.collector.notification.sms.SmsSendResult;
-import com.openvehicletracking.core.DeviceRegistry;
-import com.openvehicletracking.core.alert.Alert;
-import com.openvehicletracking.device.xtakip.XTakip;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
@@ -48,8 +40,8 @@ public class App {
         JsonObject jsonConf = new JsonObject(config);
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
 
+        Config.getInstance().load(jsonConf);
 
-        DeviceRegistry.getInstance().register(new XTakip());
         ClusterManager clusterManager = new HazelcastClusterManager();
 
         VertxOptions vertxOptions = new VertxOptions()
@@ -67,11 +59,11 @@ public class App {
         }
 
         new VerticleDeployer(vertxOptions, verticleDeployer -> {
-            verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
-            verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
-            verticleDeployer.registerEventBusCodec(Alert.class, new AlertCodec());
-            verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
-            verticleDeployer.registerEventBusCodec(SmsSendResult.class, new SmsSendResultCodec());
+//            verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
+//            verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
+//            verticleDeployer.registerEventBusCodec(Alert.class, new AlertCodec());
+//            verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
+//            verticleDeployer.registerEventBusCodec(SmsSendResult.class, new SmsSendResultCodec());
 
             JsonArray verticles = jsonConf.getJsonArray("verticles");
             verticles.forEach(v -> {

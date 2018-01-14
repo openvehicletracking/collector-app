@@ -11,10 +11,10 @@ public class AppConstants {
     public static class Events {
 
         public static final String NEW_RAW_MESSAGE = "new.rawMessage";
-        public static final String NEW_QUERY = "db.query";
-        public static final String PERSIST = "db.persist";
-        public static final String UPDATE = "db.update";
-        public static final String DELETE = "db.delete";
+        public static final String NEW_QUERY = "database.query";
+        public static final String PERSIST = "database.persist";
+        public static final String UPDATE = "database.update";
+        public static final String DELETE = "database.delete";
         public static String ALARM = "device.alarm";
         public static String NEW_SMS = "new.sms";
     }

@@ -1,10 +1,10 @@
 package com.openvehicletracking.collector.verticle;
 
 import com.openvehicletracking.collector.AppConstants;
-import com.openvehicletracking.collector.db.MongoCollection;
-import com.openvehicletracking.collector.db.Query;
-import com.openvehicletracking.collector.db.Record;
-import com.openvehicletracking.collector.db.UpdateResult;
+import com.openvehicletracking.collector.database.MongoCollection;
+import com.openvehicletracking.collector.database.Query;
+import com.openvehicletracking.collector.database.Record;
+import com.openvehicletracking.collector.database.UpdateResult;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -20,7 +20,6 @@ import io.vertx.ext.mongo.MongoClientUpdateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**

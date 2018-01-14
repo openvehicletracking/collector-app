@@ -1,8 +1,8 @@
-package com.openvehicletracking.collector.db;
+package com.openvehicletracking.collector.database;
 
 
-import com.openvehicletracking.core.GsonFactory;
-import com.openvehicletracking.core.JsonSerializeable;
+import com.openvehicletracking.core.json.GsonFactory;
+import com.openvehicletracking.core.json.JsonSerializeable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.UpdateOptions;
 
@@ -57,7 +57,7 @@ public class Record implements JsonSerializeable {
     }
 
     @Override
-    public String asJsonString() {
+    public String asJson() {
         return GsonFactory.getGson().toJson(this);
     }
 }

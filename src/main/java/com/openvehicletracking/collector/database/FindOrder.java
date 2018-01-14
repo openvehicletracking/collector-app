@@ -1,4 +1,4 @@
-package com.openvehicletracking.collector.db;
+package com.openvehicletracking.collector.database;
 
 /**
  * Created oksuz yo on 23/07/2017.
