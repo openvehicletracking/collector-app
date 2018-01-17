@@ -2,6 +2,7 @@ package com.openvehicletracking.collector.verticle;
 
 
 import com.openvehicletracking.collector.Config;
+import com.openvehicletracking.collector.DummyProtocol;
 import com.openvehicletracking.collector.connection.ActiveDeviceConnection;
 import com.openvehicletracking.collector.connection.NetSocketConnectionHolder;
 import com.openvehicletracking.collector.SessionManager;
@@ -10,6 +11,7 @@ import com.openvehicletracking.collector.processor.impl.MessageProcessorImpl;
 import com.openvehicletracking.core.protocol.Message;
 import com.openvehicletracking.core.protocol.ProtocolChain;
 import com.openvehicletracking.core.protocol.impl.ProtocolChainImpl;
+import com.openvehicletracking.protocols.gt100.Gt100Protocol;
 import com.openvehicletracking.protocols.xtakip.XTakipProtocol;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -34,7 +36,9 @@ public class TcpVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
+        protocolChain.add(new DummyProtocol());
         protocolChain.add(new XTakipProtocol());
+        protocolChain.add(new Gt100Protocol());
 
         messageProcessor = new MessageProcessorImpl(vertx.eventBus());
 
