@@ -1,4 +1,4 @@
-package com.openvehicletracking.collector.connection;
+package com.openvehicletracking.collector;
 
 import com.openvehicletracking.core.ConnectionHolder;
 import com.openvehicletracking.core.Reply;

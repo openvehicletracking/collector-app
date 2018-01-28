@@ -36,6 +36,11 @@ public class DummyProtocol implements MessagingProtocol {
             return false;
         }
 
+        @Override
+        public Message handle(Object msg, ConnectionHolder<?> connectionHolder) {
+            return null;
+        }
+
         private void log(Object msg) {
             if (msg instanceof String) {
                 LOGGER.info("new message " + msg);
@@ -45,23 +50,19 @@ public class DummyProtocol implements MessagingProtocol {
                 ByteBuffer buffer = ByteBuffer.wrap(message);
                 StringBuilder hex = new StringBuilder();
                 StringBuilder byteArr = new StringBuilder();
+                hex.append("[");
                 byteArr.append("[");
                 while (buffer.hasRemaining()) {
                     byte curr = buffer.get();
-                    hex.append("0x").append(String.format("%x", curr)).append(",");
+                    hex.append("0x").append(String.format("%02X", curr)).append(",");
                     byteArr.append(curr).append(",");
                 }
 
                 byteArr.append("]");
+                hex.append("]");
                 LOGGER.info("message as hex {}", hex.toString());
                 LOGGER.info("message as byteArr {}", byteArr.toString());
-                LOGGER.info("message as string {}", new String(message));
             }
-        }
-
-        @Override
-        public Message handle(Object msg, ConnectionHolder<?> connectionHolder) {
-            return null;
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.openvehicletracking.collector;
 
+import com.openvehicletracking.collector.codec.RecordCodec;
+import com.openvehicletracking.collector.database.Record;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
@@ -22,6 +24,7 @@ public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
+
         String configFile = System.getProperty("conf");
         if (configFile == null) {
             throw new RuntimeException("please specify your config file like -Dconf=/path/to/config.json");
@@ -39,18 +42,11 @@ public class App {
 
         JsonObject jsonConf = new JsonObject(config);
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
-
-        Config.getInstance().load(jsonConf);
+        Context.init(args, jsonConf);
 
         ClusterManager clusterManager = new HazelcastClusterManager();
-
-        VertxOptions vertxOptions = new VertxOptions()
-                .setClustered(true)
-                .setClusterManager(clusterManager)
-                .setEventLoopPoolSize(1)
-                .setHAEnabled(true)
-                .setWorkerPoolSize(1)
-                .setHAGroup("openvehicletracking");
+        VertxOptions vertxOptions = new VertxOptions(jsonConf.getJsonObject("vertx"))
+                .setClusterManager(clusterManager);
 
         String clusterHost = System.getProperty("cluster-host");
         if (clusterHost != null) {
@@ -59,11 +55,7 @@ public class App {
         }
 
         new VerticleDeployer(vertxOptions, verticleDeployer -> {
-//            verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
-//            verticleDeployer.registerEventBusCodec(Query.class, new QueryCodec());
-//            verticleDeployer.registerEventBusCodec(Alert.class, new AlertCodec());
-//            verticleDeployer.registerEventBusCodec(UpdateResult.class, new UpdateResultCodec());
-//            verticleDeployer.registerEventBusCodec(SmsSendResult.class, new SmsSendResultCodec());
+            verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());
 
             JsonArray verticles = jsonConf.getJsonArray("verticles");
             verticles.forEach(v -> {
