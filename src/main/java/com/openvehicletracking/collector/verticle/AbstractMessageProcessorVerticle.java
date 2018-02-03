@@ -73,6 +73,10 @@ public abstract  class AbstractMessageProcessorVerticle extends AbstractVerticle
                 message.put("messageType", deviceMessage.getType());
             }
 
+            if (!message.containsKey("datetime") && deviceMessage.getDate() != null){
+                message.put("datetime", deviceMessage.getDate().getTime());
+            }
+
             return message;
         }
         return null;

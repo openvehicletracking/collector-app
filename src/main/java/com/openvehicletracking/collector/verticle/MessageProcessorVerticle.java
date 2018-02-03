@@ -32,7 +32,6 @@ public class MessageProcessorVerticle extends AbstractMessageProcessorVerticle {
                 LOGGER.info(result.result().body().encodePrettily());
             });
         }
-
     }
 
 
