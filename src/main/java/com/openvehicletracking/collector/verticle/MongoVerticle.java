@@ -13,7 +13,6 @@ import io.vertx.ext.mongo.MongoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by oksuz on 23/09/2017.
@@ -29,9 +28,6 @@ public class MongoVerticle extends AbstractVerticle {
     public void start() throws Exception {
         JsonObject config = config().getJsonObject("database").getJsonObject("mongodb");
         client = MongoClient.createShared(vertx, config, AppConstants.MONGO_POOL_NAME);
-
-        //TODO: Automate this kind of things.
-        //client.createIndexWithOptions(MongoCollection.ACCESS_TOKENS.getName(), new JsonObject().put("expireAt", 1), new IndexOptions().expireAfter(0L, TimeUnit.SECONDS), result -> {});
 
         EventBus eventBus = vertx.eventBus();
         MessageConsumer<Record> recordConsumer = eventBus.consumer(AppConstants.Events.PERSIST);
