@@ -1,0 +1,74 @@
+{
+  "collectorPort": 8081,
+  "httpPort": 8080,
+  "apiVirtualPath": "/api",
+  "collectorHost": "0.0.0.0",
+  "database": {
+    "mongodb": {
+      "host": "localhost",
+      "port": 27017,
+      "db_name": "motodevcollector"
+    }
+  },
+  "sms": {
+    "clientConfig": {
+      "apiUrl": "https://api.iletimerkezi.com/v1/send-sms",
+      "apiKey": "dummyApiKey",
+      "apiSecret": "dummyApiSecret",
+      "sender": "SenderTitle"
+    },
+    "smsSender": "com.openvehicletracking.collector.notification.sms.SmsSender",
+    "locationShareMessage": "You can follow %LABEL% on %URL%"
+  },
+  "publicLocationUrl": "https://localhost:9090/%s",
+  "verticles": [
+    {
+      "id": "com.openvehicletracking.collector.verticle.AlarmVerticle",
+      "options": {
+        "instances": 1,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.HttpVerticle",
+      "options": {
+        "instances": 1,
+        "worker": false,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.MessageProcessorVerticle",
+      "options": {
+        "instances": 1,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.MongoVerticle",
+      "options": {
+        "instances": 1,
+        "worker": true,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.TcpVerticle",
+      "options": {
+        "instances": 1,
+        "worker": false,
+        "ha": true
+      }
+    },
+    {
+      "id": "com.openvehicletracking.collector.verticle.SmsVerticle",
+      "options": {
+        "instances": 2,
+        "worker": true,
+        "ha": true
+      }
+    }
+  ]
+}

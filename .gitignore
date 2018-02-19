@@ -6,11 +6,13 @@
 
 # BlueJ files
 *.ctxt
+*.iml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
+!gradle/wrapper
 *.jar
 *.war
 *.ear
@@ -24,6 +26,5 @@ hs_err_pid*
 .gradle
 .idea
 build
-gradle
 
 .vertx
