@@ -26,7 +26,7 @@ public class Config {
 
     public String getString(String key, String def) {
         Object value = get(key);
-        return value != null && value instanceof String ? (String) value : def;
+        return value instanceof String ? (String) value : def;
     }
 
 
@@ -36,7 +36,7 @@ public class Config {
 
     public int getInt(String key, int def) {
         Object value = get(key);
-        return value != null && value instanceof Integer ? (int) value : def;
+        return value instanceof Integer ? (int) value : def;
     }
 
     protected Object get(String key) {

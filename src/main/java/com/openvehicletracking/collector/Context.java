@@ -22,7 +22,6 @@ public class Context {
 
     public static void init(String args[], JsonObject conf) {
         config = Config.getInstance().load(conf);
-        protocolChain.add(new DummyProtocol());
         protocolChain.add(new Gt100Protocol());
         protocolChain.add(new XTakipProtocol());
     }

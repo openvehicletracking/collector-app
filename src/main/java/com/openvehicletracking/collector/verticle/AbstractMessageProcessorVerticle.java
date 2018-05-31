@@ -17,41 +17,47 @@ import java.util.Optional;
 
 public abstract  class AbstractMessageProcessorVerticle extends AbstractVerticle {
 
-    protected NetSocket socket;
+    protected NetSocketConnectionHolder connectionHolder;
     protected MessagingProtocol protocol;
     protected Device device;
 
     public AbstractMessageProcessorVerticle(NetSocket socket) {
-        this.socket = socket;
+        this.connectionHolder = new NetSocketConnectionHolder(socket);
     }
 
     protected Message getMessage(Buffer buffer) {
-        ConnectionHolder connectionHolder = new NetSocketConnectionHolder(socket);
-        Message message = null;
-        if (protocol == null) {
-            message = Context.getProtocolChain().handle(buffer.getBytes(), connectionHolder);
-            if (message != null) {
-                protocol = Context.getProtocolChain().find(message.getProtocolName());
-            }
-        } else {
-            byte[] messageAsByte = buffer.getBytes();
-            Optional<MessageHandler> handler = protocol.getHandlers().stream().filter(messageHandler -> messageHandler.isMatch(messageAsByte)).findFirst();
+        byte[] messageAsByte = buffer.getBytes();
+        if (device == null || protocol == null) {
+            detectProtocolAndDeviceFromMessage(messageAsByte);
+        }
+
+        if (protocol != null && device != null) {
+            Optional<MessageHandler> handler = protocol.getHandlers()
+                    .stream()
+                    .filter(messageHandler -> messageHandler.isMatch(messageAsByte))
+                    .findFirst();
+
+
             if (handler.isPresent()) {
-                message = handler.get().handle(messageAsByte, connectionHolder);
+                 return handler.get().handle(messageAsByte, connectionHolder);
             }
         }
 
+        return null;
+    }
+
+    protected void detectProtocolAndDeviceFromMessage(byte[] m) {
+        Message message = Context.getProtocolChain().handle(m, connectionHolder);
         if (message != null && message.getDevice() != null && message.getDevice().getId() != null) {
+            protocol = Context.getProtocolChain().find(message.getProtocolName());
             device = message.getDevice();
         }
-
-        return message;
     }
 
 
     @Override
     public void start() throws Exception {
-        socket.handler(this::handler);
+        connectionHolder.getConnection().handler(this::handler);
     }
 
     @Nullable
