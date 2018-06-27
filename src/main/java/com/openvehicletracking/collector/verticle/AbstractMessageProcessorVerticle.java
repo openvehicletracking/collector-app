@@ -2,7 +2,6 @@ package com.openvehicletracking.collector.verticle;
 
 import com.openvehicletracking.collector.Context;
 import com.openvehicletracking.collector.NetSocketConnectionHolder;
-import com.openvehicletracking.core.ConnectionHolder;
 import com.openvehicletracking.core.Device;
 import com.openvehicletracking.core.protocol.Message;
 import com.openvehicletracking.core.protocol.MessageHandler;
@@ -15,7 +14,7 @@ import io.vertx.core.net.NetSocket;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract  class AbstractMessageProcessorVerticle extends AbstractVerticle {
+public abstract class AbstractMessageProcessorVerticle extends AbstractVerticle {
 
     protected NetSocketConnectionHolder connectionHolder;
     protected MessagingProtocol protocol;

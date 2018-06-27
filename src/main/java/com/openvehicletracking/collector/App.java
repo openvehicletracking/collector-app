@@ -6,8 +6,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.cluster.ClusterManager;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +42,14 @@ public class App {
         LOGGER.debug("Config: {}", jsonConf.encodePrettily());
         Context.init(args, jsonConf);
 
-        ClusterManager clusterManager = new HazelcastClusterManager();
-        VertxOptions vertxOptions = new VertxOptions(jsonConf.getJsonObject("vertx"))
-                .setClusterManager(clusterManager);
+//        HazelcastClusterManager clusterManager = new HazelcastClusterManager();
+        VertxOptions vertxOptions = new VertxOptions(jsonConf.getJsonObject("vertx"));
 
-        String clusterHost = System.getProperty("cluster-host");
-        if (clusterHost != null) {
-            LOGGER.info("cluster host is {}", clusterHost);
-            vertxOptions.setClusterHost(clusterHost).setClusterPort(15701);
-        }
+//        String clusterHost = System.getProperty("cluster-host");
+//        if (clusterHost != null) {
+//            LOGGER.info("cluster host is {}", clusterHost);
+//            vertxOptions.setClusterHost(clusterHost).setClusterPort(15701);
+//        }
 
         new VerticleDeployer(vertxOptions, verticleDeployer -> {
             verticleDeployer.registerEventBusCodec(Record.class, new RecordCodec());

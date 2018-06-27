@@ -43,7 +43,6 @@ public class TcpVerticle extends AbstractVerticle {
             String deploymentId = result.result();
             socket.closeHandler(connectionCloseHandler(socket, deploymentId));
         });
-
     }
 
     private Handler<Void> connectionCloseHandler(final NetSocket socket, final String deploymentId) {
